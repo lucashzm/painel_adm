@@ -8,9 +8,22 @@ const botaoPesquisar = document.getElementById('pesquisarPedidos');
 const botaoLimpar = document.getElementById('limparFiltros');
 const tabelaPedidos = document.getElementById('listaPedidos');
 
-function formatarBRL(valor){return Number(valor||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+function formatarBRL(valor){
+ return Number(valor||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+
+async function confirmarAlteracao(){
+ const senha=prompt('Digite sua senha para confirmar a alteração:');
+ if(!senha)return false;
+ const {data:{user}}=await db.auth.getUser();
+ if(!user)return false;
+ const login=await db.auth.signInWithPassword({email:user.email,password:senha});
+ if(login.error){alert('Senha inválida');return false;}
+ return true;
+}
 
 async function atualizarStatus(id,campo,valor){
+ if(!await confirmarAlteracao())return;
  const {error}=await db.from('pedidos').update({[campo]:valor}).eq('id',id);
  if(error){console.error(error);alert('Erro ao atualizar status');return;}
  pesquisarPedidos();
@@ -19,7 +32,6 @@ async function atualizarStatus(id,campo,valor){
 async function abrirDetalhesPedido(id){
  const {data,error}=await db.from('pedidos').select('*,clientes(*),pedido_itens(*)').eq('id',id).single();
  if(error){console.error(error);alert('Erro ao carregar detalhes');return;}
-
  alert(`Pedido ${data.numero_pedido}\n\nCliente: ${data.clientes?.nome||''}\nPagamento: ${data.forma_pagamento||''}\nEntrega prevista: ${data.previsao_entrega||''}\nValor: ${formatarBRL(data.valor_total)}`);
 }
 
@@ -38,6 +50,12 @@ async function pesquisarPedidos(){
 
 function statusBadge(valor,tipo){return `<span class="status-badge ${tipo}">${valor||''}</span>`;}
 
+function opcoesStatus(id,campo,atual,opcoes){
+ const escolha=prompt(`Status atual: ${atual}\n\nEscolha o novo status:\n${opcoes.map((x,i)=>`${i+1} - ${x}`).join('\n')}`);
+ const indice=Number(escolha)-1;
+ if(opcoes[indice]) atualizarStatus(id,campo,opcoes[indice]);
+}
+
 function renderizarPedidos(pedidos){
  tabelaPedidos.innerHTML='';
  pedidos.forEach(p=>{
@@ -50,9 +68,9 @@ function renderizarPedidos(pedidos){
  <td>${statusBadge(p.status_financeiro,'financeiro')}</td>
  <td>${p.created_at?new Date(p.created_at).toLocaleDateString('pt-BR'):''}</td>
  <td>
+ <button onclick="opcoesStatus('${p.id}','status_entrega','${p.status_entrega||''}', ['Pendente','Aguardando entrega','Reservado','Concluído','Cancelado'])">Entrega</button>
+ <button onclick="opcoesStatus('${p.id}','status_financeiro','${p.status_financeiro||''}', ['Pendente','Pagamento na entrega','Pago','Cancelado'])">Financeiro</button>
  <button onclick="abrirDetalhesPedido('${p.id}')">+ Dados do pedido</button>
- <button onclick="atualizarStatus('${p.id}','status_entrega','Concluído')">Concluir entrega</button>
- <button onclick="atualizarStatus('${p.id}','status_financeiro','Pago')">Pago</button>
  </td></tr>`;
  });
 }
@@ -60,6 +78,7 @@ function renderizarPedidos(pedidos){
 function limparFiltros(){document.querySelectorAll('.filtros input,.filtros select').forEach(c=>c.value='');tabelaPedidos.innerHTML='';}
 
 window.abrirDetalhesPedido=abrirDetalhesPedido;
+window.opcoesStatus=opcoesStatus;
 window.atualizarStatus=atualizarStatus;
 window.pesquisarPedidos=pesquisarPedidos;
 botaoPesquisar?.addEventListener('click',pesquisarPedidos);
