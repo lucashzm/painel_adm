@@ -10,12 +10,17 @@ const tabelaPedidos = document.getElementById('listaPedidos');
 
 async function atualizarStatus(id,campo,valor){
  const {error}=await db.from('pedidos').update({[campo]:valor}).eq('id',id);
- if(error){console.error(error);alert('Erro ao atualizar status');return;}
+ if(error){
+  console.error(error);
+  alert('Erro ao atualizar status');
+  return;
+ }
  pesquisarPedidos();
 }
 
 async function pesquisarPedidos(){
  const numero=document.getElementById('buscaPedido').value.trim();
+ const cliente=document.getElementById('buscaCliente')?.value.trim();
  const entrega=document.getElementById('filtroEntrega').value;
  const financeiro=document.getElementById('filtroFinanceiro').value;
  const dataInicial=document.getElementById('dataInicial')?.value;
@@ -25,18 +30,33 @@ async function pesquisarPedidos(){
  .from('pedidos')
  .select('id,numero_pedido,valor_total,status_entrega,status_financeiro,created_at');
 
- if(numero) query=query.eq('numero_pedido',numero);
- if(entrega) query=query.eq('status_entrega',entrega);
- if(financeiro) query=query.eq('status_financeiro',financeiro);
- if(dataInicial) query=query.gte('created_at',dataInicial);
- if(dataFinal) query=query.lte('created_at',dataFinal+'T23:59:59');
+ // Cada filtro atua somente quando preenchido
+ if(numero){
+  query=query.eq('numero_pedido',numero);
+ }
+
+ if(entrega){
+  query=query.eq('status_entrega',entrega);
+ }
+
+ if(financeiro){
+  query=query.eq('status_financeiro',financeiro);
+ }
+
+ if(dataInicial){
+  query=query.gte('created_at',dataInicial+'T00:00:00');
+ }
+
+ if(dataFinal){
+  query=query.lte('created_at',dataFinal+'T23:59:59');
+ }
 
  const {data,error}=await query.order('created_at',{ascending:false});
 
  if(error){
-   console.error(error);
-   alert('Erro ao buscar pedidos');
-   return;
+  console.error(error);
+  alert('Erro ao buscar pedidos');
+  return;
  }
 
  renderizarPedidos(data||[]);
@@ -44,22 +64,23 @@ async function pesquisarPedidos(){
 
 function renderizarPedidos(pedidos){
  tabelaPedidos.innerHTML='';
+
  pedidos.forEach(p=>{
- tabelaPedidos.innerHTML+=`
- <tr>
- <td>${p.numero_pedido}</td>
- <td></td>
- <td></td>
- <td>${p.valor_total||''}</td>
- <td>${p.status_entrega||''}</td>
- <td>${p.status_financeiro||''}</td>
- <td>${p.created_at?new Date(p.created_at).toLocaleDateString('pt-BR'):''}</td>
- <td>
- <button onclick="atualizarStatus('${p.id}','status_entrega','Reservado')">Reservar</button>
- <button onclick="atualizarStatus('${p.id}','status_financeiro','Pago')">Pago</button>
- <button onclick="atualizarStatus('${p.id}','status_financeiro','Pagamento na entrega')">Entrega</button>
- </td>
- </tr>`;
+  tabelaPedidos.innerHTML+=`
+  <tr>
+   <td>${p.numero_pedido}</td>
+   <td></td>
+   <td></td>
+   <td>${p.valor_total||''}</td>
+   <td>${p.status_entrega||''}</td>
+   <td>${p.status_financeiro||''}</td>
+   <td>${p.created_at?new Date(p.created_at).toLocaleDateString('pt-BR'):''}</td>
+   <td>
+    <button onclick="atualizarStatus('${p.id}','status_entrega','Reservado')">Reservar</button>
+    <button onclick="atualizarStatus('${p.id}','status_financeiro','Pago')">Pago</button>
+    <button onclick="atualizarStatus('${p.id}','status_financeiro','Pagamento na entrega')">Entrega</button>
+   </td>
+  </tr>`;
  });
 }
 
