@@ -12,15 +12,31 @@
 <main>
 <h1>Pedidos</h1>
 <section class="filtros">
-<input placeholder="Número do pedido">
-<input placeholder="Cliente">
-<select><option>Todos vendedores</option></select>
-<select><option>Status entrega</option><option>Novo pedido</option><option>Reservado</option><option>Pronto para entrega</option><option>Entregue</option><option>Cancelado</option></select>
-<select><option>Status financeiro</option><option>Pago</option><option>Pagamento na entrega</option><option>Aguardando pagamento</option><option>Pago parcialmente</option><option>Cancelado</option></select>
+<input id="buscaPedido" placeholder="Número do pedido">
+<input id="buscaCliente" placeholder="Cliente ou CPF/CNPJ">
+<select id="filtroVendedor"><option value="">Todos vendedores</option></select>
+<select id="filtroEntrega">
+<option value="">Status entrega</option>
+<option>Novo pedido</option>
+<option>Reservado</option>
+<option>Pronto para entrega</option>
+<option>Entregue</option>
+<option>Cancelado</option>
+</select>
+<select id="filtroFinanceiro">
+<option value="">Status financeiro</option>
+<option>Pago</option>
+<option>Pagamento na entrega</option>
+<option>Aguardando pagamento</option>
+<option>Pago parcialmente</option>
+<option>Cancelado</option>
+</select>
+<button id="pesquisarPedidos">Pesquisar</button>
+<button id="limparFiltros">Limpar</button>
 </section>
 <table>
 <thead><tr><th>Pedido</th><th>Cliente</th><th>Vendedor</th><th>Valor</th><th>Entrega</th><th>Financeiro</th><th>Data</th></tr></thead>
-<tbody></tbody>
+<tbody id="listaPedidos"></tbody>
 </table>
 </main>
 </div>
