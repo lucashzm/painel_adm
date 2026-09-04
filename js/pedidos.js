@@ -8,9 +8,7 @@ const botaoPesquisar = document.getElementById('pesquisarPedidos');
 const botaoLimpar = document.getElementById('limparFiltros');
 const tabelaPedidos = document.getElementById('listaPedidos');
 
-function formatarBRL(valor){
- return Number(valor||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-}
+function formatarBRL(valor){return Number(valor||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 
 async function confirmarAlteracao(){
  const senha=prompt('Digite sua senha para confirmar a alteração:');
@@ -26,19 +24,36 @@ async function atualizarStatus(id,campo,valor){
  if(!await confirmarAlteracao())return;
  const {error}=await db.from('pedidos').update({[campo]:valor}).eq('id',id);
  if(error){console.error(error);alert('Erro ao atualizar status');return;}
+ fecharModal();
  pesquisarPedidos();
+}
+
+function abrirModalStatus(id,campo,atual,opcoes){
+ const modal=document.getElementById('modalStatus');
+ modal.innerHTML=`<div class="modal-conteudo">
+ <button onclick="fecharModal()">X</button>
+ <h3>Alterar ${campo==='status_entrega'?'Entrega':'Financeiro'}</h3>
+ <p>Status atual: <b>${atual}</b></p>
+ ${opcoes.map(status=>`<button onclick="atualizarStatus('${id}','${campo}','${status}')">${status}</button>`).join('')}
+ </div>`;
+ modal.style.display='flex';
+}
+
+function fecharModal(){
+ const modal=document.getElementById('modalStatus');
+ if(modal)modal.style.display='none';
 }
 
 async function abrirDetalhesPedido(id){
  const {data,error}=await db.from('pedidos').select('*,clientes(*),pedido_itens(*)').eq('id',id).single();
- if(error){console.error(error);alert('Erro ao carregar detalhes');return;}
- alert(`Pedido ${data.numero_pedido}\n\nCliente: ${data.clientes?.nome||''}\nPagamento: ${data.forma_pagamento||''}\nEntrega prevista: ${data.previsao_entrega||''}\nValor: ${formatarBRL(data.valor_total)}`);
+ if(error){console.error(error);return;}
+ alert(`Pedido ${data.numero_pedido}\nCliente: ${data.clientes?.nome||''}\nValor: ${formatarBRL(data.valor_total)}`);
 }
 
 async function pesquisarPedidos(){
- const numero=document.getElementById('buscaPedido')?.value.trim() || '';
- const entrega=document.getElementById('filtroEntrega')?.value || '';
- const financeiro=document.getElementById('filtroFinanceiro')?.value || '';
+ const numero=document.getElementById('buscaPedido')?.value.trim()||'';
+ const entrega=document.getElementById('filtroEntrega')?.value||'';
+ const financeiro=document.getElementById('filtroFinanceiro')?.value||'';
  let query=db.from('pedidos').select('id,numero_pedido,valor_total,status_entrega,status_financeiro,created_at,clientes(nome),users(nome)');
  if(numero)query=query.eq('numero_pedido',numero);
  if(entrega)query=query.eq('status_entrega',entrega);
@@ -49,12 +64,6 @@ async function pesquisarPedidos(){
 }
 
 function statusBadge(valor,tipo){return `<span class="status-badge ${tipo}">${valor||''}</span>`;}
-
-function opcoesStatus(id,campo,atual,opcoes){
- const escolha=prompt(`Status atual: ${atual}\n\nEscolha o novo status:\n${opcoes.map((x,i)=>`${i+1} - ${x}`).join('\n')}`);
- const indice=Number(escolha)-1;
- if(opcoes[indice]) atualizarStatus(id,campo,opcoes[indice]);
-}
 
 function renderizarPedidos(pedidos){
  tabelaPedidos.innerHTML='';
@@ -68,8 +77,8 @@ function renderizarPedidos(pedidos){
  <td>${statusBadge(p.status_financeiro,'financeiro')}</td>
  <td>${p.created_at?new Date(p.created_at).toLocaleDateString('pt-BR'):''}</td>
  <td>
- <button onclick="opcoesStatus('${p.id}','status_entrega','${p.status_entrega||''}', ['Pendente','Aguardando entrega','Reservado','Concluído','Cancelado'])">Entrega</button>
- <button onclick="opcoesStatus('${p.id}','status_financeiro','${p.status_financeiro||''}', ['Pendente','Pagamento na entrega','Pago','Cancelado'])">Financeiro</button>
+ <button onclick="abrirModalStatus('${p.id}','status_entrega','${p.status_entrega||''}',['Pendente','Aguardando entrega','Reservado','Concluído','Cancelado'])">${p.status_entrega}</button>
+ <button onclick="abrirModalStatus('${p.id}','status_financeiro','${p.status_financeiro||''}',['Pendente','Pagamento na entrega','Pago','Cancelado'])">${p.status_financeiro}</button>
  <button onclick="abrirDetalhesPedido('${p.id}')">+ Dados do pedido</button>
  </td></tr>`;
  });
@@ -77,9 +86,23 @@ function renderizarPedidos(pedidos){
 
 function limparFiltros(){document.querySelectorAll('.filtros input,.filtros select').forEach(c=>c.value='');tabelaPedidos.innerHTML='';}
 
-window.abrirDetalhesPedido=abrirDetalhesPedido;
-window.opcoesStatus=opcoesStatus;
+window.abrirModalStatus=abrirModalStatus;
+window.fecharModal=fecharModal;
 window.atualizarStatus=atualizarStatus;
+window.abrirDetalhesPedido=abrirDetalhesPedido;
 window.pesquisarPedidos=pesquisarPedidos;
+
+if(!document.getElementById('modalStatus')){
+ const div=document.createElement('div');
+ div.id='modalStatus';
+ div.style.display='none';
+ div.style.position='fixed';
+ div.style.inset='0';
+ div.style.background='rgba(0,0,0,.4)';
+ div.style.alignItems='center';
+ div.style.justifyContent='center';
+ document.body.appendChild(div);
+}
+
 botaoPesquisar?.addEventListener('click',pesquisarPedidos);
 botaoLimpar?.addEventListener('click',limparFiltros);
