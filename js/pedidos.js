@@ -21,7 +21,9 @@ async function pesquisarPedidos(){
  const dataInicial=document.getElementById('dataInicial')?.value;
  const dataFinal=document.getElementById('dataFinal')?.value;
 
- let query=db.from('pedidos').select(`id,numero_pedido,valor_total,status_entrega,status_financeiro,created_at,clientes(nome),users(nome)`);
+ let query=db
+ .from('pedidos')
+ .select('id,numero_pedido,valor_total,status_entrega,status_financeiro,created_at');
 
  if(numero) query=query.eq('numero_pedido',numero);
  if(entrega) query=query.eq('status_entrega',entrega);
@@ -30,7 +32,13 @@ async function pesquisarPedidos(){
  if(dataFinal) query=query.lte('created_at',dataFinal+'T23:59:59');
 
  const {data,error}=await query.order('created_at',{ascending:false});
- if(error){console.error(error);return;}
+
+ if(error){
+   console.error(error);
+   alert('Erro ao buscar pedidos');
+   return;
+ }
+
  renderizarPedidos(data||[]);
 }
 
@@ -40,8 +48,8 @@ function renderizarPedidos(pedidos){
  tabelaPedidos.innerHTML+=`
  <tr>
  <td>${p.numero_pedido}</td>
- <td>${p.clientes?.nome||''}</td>
- <td>${p.users?.nome||''}</td>
+ <td></td>
+ <td></td>
  <td>${p.valor_total||''}</td>
  <td>${p.status_entrega||''}</td>
  <td>${p.status_financeiro||''}</td>
