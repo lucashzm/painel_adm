@@ -17,6 +17,7 @@
 <select id="filtroVendedor"><option value="">Todos vendedores</option></select>
 <select id="filtroEntrega">
 <option value="">Status entrega</option>
+<option>Pendente</option>
 <option>Novo pedido</option>
 <option>Reservado</option>
 <option>Pronto para entrega</option>
@@ -25,11 +26,14 @@
 </select>
 <select id="filtroFinanceiro">
 <option value="">Status financeiro</option>
+<option>Pendente</option>
 <option>Aguardando pagamento</option>
 <option>Pagamento na entrega</option>
 <option>Pago</option>
 <option>Cancelado</option>
 </select>
+<input id="dataInicial" type="date">
+<input id="dataFinal" type="date">
 <div class="acoes-filtro">
 <button id="pesquisarPedidos" class="btn btn-pesquisar">Pesquisar</button>
 <button id="limparFiltros" class="btn btn-limpar">Limpar</button>
