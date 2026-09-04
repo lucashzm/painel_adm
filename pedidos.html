@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedidos - Decoralar</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="layout">
+<aside class="menu"><h2>DECORALAR</h2><nav><a href="index.html">Dashboard</a><a href="pedidos.html">Pedidos</a></nav></aside>
+<main>
+<h1>Pedidos</h1>
+<section class="filtros">
+<input placeholder="Número do pedido">
+<input placeholder="Cliente">
+<select><option>Todos vendedores</option></select>
+<select><option>Status entrega</option><option>Novo pedido</option><option>Reservado</option><option>Pronto para entrega</option><option>Entregue</option><option>Cancelado</option></select>
+<select><option>Status financeiro</option><option>Pago</option><option>Pagamento na entrega</option><option>Aguardando pagamento</option><option>Pago parcialmente</option><option>Cancelado</option></select>
+</section>
+<table>
+<thead><tr><th>Pedido</th><th>Cliente</th><th>Vendedor</th><th>Valor</th><th>Entrega</th><th>Financeiro</th><th>Data</th></tr></thead>
+<tbody></tbody>
+</table>
+</main>
+</div>
+<script src="js/pedidos.js"></script>
+</body>
+</html>
