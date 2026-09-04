@@ -1,12 +1,11 @@
 // Pedidos Decoralar
+const SUPABASE_URL='https://hpjiwmmslyvuqrkllmvb.supabase.co';
+const SUPABASE_KEY='sb_publishable_bx1NzXS3nlgFK-te-Nuk9g_6n0j4htx';
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const SUPABASE_URL = 'https://hpjiwmmslyvuqrkllmvb.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_bx1NzXS3nlgFK-te-Nuk9g_6n0j4htx';
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const botaoPesquisar = document.getElementById('pesquisarPedidos');
-const botaoLimpar = document.getElementById('limparFiltros');
-const tabelaPedidos = document.getElementById('listaPedidos');
+const botaoPesquisar=document.getElementById('pesquisarPedidos');
+const botaoLimpar=document.getElementById('limparFiltros');
+const tabelaPedidos=document.getElementById('listaPedidos');
 
 function formatarBRL(valor){return Number(valor||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 
@@ -23,7 +22,7 @@ async function confirmarAlteracao(){
 async function atualizarStatus(id,campo,valor){
  if(!await confirmarAlteracao())return;
  const {error}=await db.from('pedidos').update({[campo]:valor}).eq('id',id);
- if(error){console.error(error);alert('Erro ao atualizar status');return;}
+ if(error){console.error(error);return alert('Erro ao atualizar');}
  fecharModal();
  pesquisarPedidos();
 }
@@ -34,19 +33,16 @@ function abrirModalStatus(id,campo,atual,opcoes){
  <button onclick="fecharModal()">X</button>
  <h3>Alterar ${campo==='status_entrega'?'Entrega':'Financeiro'}</h3>
  <p>Status atual: <b>${atual}</b></p>
- ${opcoes.map(status=>`<button onclick="atualizarStatus('${id}','${campo}','${status}')">${status}</button>`).join('')}
+ ${opcoes.map(s=>`<button onclick="atualizarStatus('${id}','${campo}','${s}')">${s}</button>`).join('')}
  </div>`;
  modal.style.display='flex';
 }
 
-function fecharModal(){
- const modal=document.getElementById('modalStatus');
- if(modal)modal.style.display='none';
-}
+function fecharModal(){document.getElementById('modalStatus').style.display='none';}
 
 async function abrirDetalhesPedido(id){
  const {data,error}=await db.from('pedidos').select('*,clientes(*),pedido_itens(*)').eq('id',id).single();
- if(error){console.error(error);return;}
+ if(error)return console.error(error);
  alert(`Pedido ${data.numero_pedido}\nCliente: ${data.clientes?.nome||''}\nValor: ${formatarBRL(data.valor_total)}`);
 }
 
@@ -59,7 +55,7 @@ async function pesquisarPedidos(){
  if(entrega)query=query.eq('status_entrega',entrega);
  if(financeiro)query=query.eq('status_financeiro',financeiro);
  const {data,error}=await query.order('created_at',{ascending:false});
- if(error){console.error(error);return;}
+ if(error)return console.error(error);
  renderizarPedidos(data||[]);
 }
 
@@ -75,12 +71,9 @@ function renderizarPedidos(pedidos){
  <td>${formatarBRL(p.valor_total)}</td>
  <td>${statusBadge(p.status_entrega,'entrega')}</td>
  <td>${statusBadge(p.status_financeiro,'financeiro')}</td>
- <td>${p.created_at?new Date(p.created_at).toLocaleDateString('pt-BR'):''}</td>
- <td>
- <button onclick="abrirModalStatus('${p.id}','status_entrega','${p.status_entrega||''}',['Pendente','Aguardando entrega','Reservado','Concluído','Cancelado'])">${p.status_entrega}</button>
- <button onclick="abrirModalStatus('${p.id}','status_financeiro','${p.status_financeiro||''}',['Pendente','Pagamento na entrega','Pago','Cancelado'])">${p.status_financeiro}</button>
- <button onclick="abrirDetalhesPedido('${p.id}')">+ Dados do pedido</button>
- </td></tr>`;
+ <td><button onclick="abrirModalStatus('${p.id}','status_entrega','${p.status_entrega||''}',${JSON.stringify(['Pendente','Reservado','Aguardando entrega','Concluído'])})">${p.status_entrega}</button>
+ <button onclick="abrirModalStatus('${p.id}','status_financeiro','${p.status_financeiro||''}',${JSON.stringify(['Pendente','Pagamento na entrega','Pago'])})">${p.status_financeiro}</button>
+ <button onclick="abrirDetalhesPedido('${p.id}')">+</button></td></tr>`;
  });
 }
 
@@ -92,17 +85,7 @@ window.atualizarStatus=atualizarStatus;
 window.abrirDetalhesPedido=abrirDetalhesPedido;
 window.pesquisarPedidos=pesquisarPedidos;
 
-if(!document.getElementById('modalStatus')){
- const div=document.createElement('div');
- div.id='modalStatus';
- div.style.display='none';
- div.style.position='fixed';
- div.style.inset='0';
- div.style.background='rgba(0,0,0,.4)';
- div.style.alignItems='center';
- div.style.justifyContent='center';
- document.body.appendChild(div);
-}
+if(!document.getElementById('modalStatus')){const d=document.createElement('div');d.id='modalStatus';d.style.cssText='display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);align-items:center;justify-content:center';document.body.appendChild(d);}
 
 botaoPesquisar?.addEventListener('click',pesquisarPedidos);
 botaoLimpar?.addEventListener('click',limparFiltros);
