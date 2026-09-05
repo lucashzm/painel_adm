@@ -18,6 +18,18 @@
 </aside>
 <main>
 <header><h1>Painel Administrativo</h1><p>Acompanhamento de vendas, entregas e financeiro</p></header>
+<section class="dashboard-filtro">
+  <div>
+    <span class="dashboard-kicker">PERÍODO DA OPERAÇÃO</span>
+    <h2>Pedidos criados no período</h2>
+  </div>
+  <div class="dashboard-filtro-campos">
+    <label>De<input type="date" id="dataInicial"></label>
+    <label>Até<input type="date" id="dataFinal"></label>
+    <button class="btn btn-pesquisar" id="aplicarFiltro">Aplicar</button>
+    <button class="btn btn-limpar" id="ultimos30">Últimos 30 dias</button>
+  </div>
+</section>
 <section class="dashboard-status-cards">
   <article class="dashboard-card dashboard-entrega">
     <div class="dashboard-card-header"><div><span class="dashboard-kicker">OPERAÇÃO</span><h2>🚚 Status de entrega</h2></div><span class="dashboard-total" id="totalEntrega">0</span></div>
