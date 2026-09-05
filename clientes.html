@@ -19,13 +19,35 @@
 <main>
 <header>
 <h1>Clientes</h1>
-<p>Consulte os clientes cadastrados e seu histórico de compras.</p>
+<p>Pesquise os clientes cadastrados pelos dados abaixo.</p>
 </header>
-<section class="clientes-toolbar">
-<div class="clientes-titulo"><span class="dashboard-kicker">CADASTRO</span><h2>Carteira de clientes</h2><span id="totalClientes" class="clientes-contador">0 clientes</span></div>
-<div class="clientes-busca"><label for="buscaCliente">Buscar cliente</label><input id="buscaCliente" placeholder="Nome, CPF/CNPJ, telefone ou e-mail"></div>
+<section class="clientes-filtros">
+<div class="clientes-filtro">
+<label for="filtroNome">Nome</label>
+<input id="filtroNome" placeholder="Nome do cliente">
+</div>
+<div class="clientes-filtro">
+<label for="filtroCpf">CPF/CNPJ</label>
+<input id="filtroCpf" placeholder="CPF ou CNPJ">
+</div>
+<div class="clientes-filtro">
+<label for="filtroTelefone">Telefone</label>
+<input id="filtroTelefone" placeholder="Telefone">
+</div>
+<div class="clientes-filtro">
+<label for="filtroEmail">E-mail</label>
+<input id="filtroEmail" type="email" placeholder="E-mail">
+</div>
+<div class="clientes-filtro">
+<label for="filtroData">Data de cadastro</label>
+<input id="filtroData" type="date">
+</div>
+<div class="clientes-acoes">
+<button id="pesquisarClientes" class="btn btn-pesquisar">Pesquisar</button>
+<button id="limparFiltros" class="btn btn-limpar">Limpar</button>
+</div>
 </section>
-<section class="clientes-lista" id="listaClientes"><div class="clientes-vazio">Carregando clientes...</div></section>
+<section class="clientes-lista" id="listaClientes"><div class="clientes-vazio">Informe um ou mais campos e clique em Pesquisar.</div></section>
 </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
