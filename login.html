@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Decoralar</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="login-page">
+<main class="login-card">
+<div class="login-marca">DECORALAR</div>
+<span class="dashboard-kicker">PAINEL ADMINISTRATIVO</span>
+<h1>Bem-vindo de volta</h1>
+<p class="login-subtitulo">Entre com seu e-mail e senha para acessar o painel.</p>
+<form id="loginForm" class="login-form">
+<label for="email">E-mail</label>
+<input id="email" type="email" autocomplete="username" placeholder="seu@email.com" required>
+<label for="senha">Senha</label>
+<input id="senha" type="password" autocomplete="current-password" placeholder="Sua senha" required>
+<div id="loginErro" class="login-erro" hidden></div>
+<button id="entrar" class="login-botao" type="submit">Entrar</button>
+</form>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>
