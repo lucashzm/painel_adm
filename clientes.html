@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clientes - Decoralar</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="layout">
+<aside class="menu">
+<h2>DECORALAR</h2>
+<nav>
+<a href="index.html">Dashboard</a>
+<a href="pedidos.html">Pedidos</a>
+<a href="clientes.html" class="menu-ativo">Clientes</a>
+</nav>
+</aside>
+<main>
+<header>
+<h1>Clientes</h1>
+<p>Consulte os clientes cadastrados e seu histórico de compras.</p>
+</header>
+<section class="clientes-toolbar">
+<div class="clientes-titulo"><span class="dashboard-kicker">CADASTRO</span><h2>Carteira de clientes</h2><span id="totalClientes" class="clientes-contador">0 clientes</span></div>
+<div class="clientes-busca"><label for="buscaCliente">Buscar cliente</label><input id="buscaCliente" placeholder="Nome, CPF/CNPJ, telefone ou e-mail"></div>
+</section>
+<section class="clientes-lista" id="listaClientes"><div class="clientes-vazio">Carregando clientes...</div></section>
+</main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/clientes.js"></script>
+</body>
+</html>
