@@ -3,37 +3,55 @@ const SUPABASE_KEY='sb_publishable_bx1NzXS3nlgFK-te-Nuk9g_6n0j4htx';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 const listaEl=document.getElementById('listaClientes');
-const buscaEl=document.getElementById('buscaCliente');
-const totalEl=document.getElementById('totalClientes');
-let clientes=[];
+const filtros={
+ nome:document.getElementById('filtroNome'),
+ cpf:document.getElementById('filtroCpf'),
+ telefone:document.getElementById('filtroTelefone'),
+ email:document.getElementById('filtroEmail'),
+ data:document.getElementById('filtroData')
+};
 
 function formatarBRL(valor){return Number(valor||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
 function inicial(nome){return (String(nome||'?').trim()[0]||'?').toUpperCase();}
+function normalizar(v){return String(v||'').toLowerCase().trim();}
 
-async function carregarClientes(){
- listaEl.innerHTML='<div class="clientes-vazio">Carregando clientes...</div>';
- const {data,error}=await db.from('clientes').select('id,nome,cpf_cnpj,telefone,email').order('nome');
- if(error){console.error(error);listaEl.innerHTML='<div class="erro-tabela">Não foi possível carregar os clientes.</div>';return;}
- const ids=(data||[]).map(c=>c.id);
- let pedidos=[];
- if(ids.length){const r=await db.from('pedidos').select('id,cliente_id,valor_total').in('cliente_id',ids);if(!r.error)pedidos=r.data||[];}
- clientes=(data||[]).map(c=>{const ps=pedidos.filter(p=>p.cliente_id===c.id);return {...c,pedidos:ps.length,total:ps.reduce((s,p)=>s+Number(p.valor_total||0),0)}});
- renderizar();
+function limparFiltros(){
+ Object.values(filtros).forEach(el=>el.value='');
+ listaEl.innerHTML='<div class="clientes-vazio">Informe um ou mais campos e clique em Pesquisar.</div>';
 }
 
-function renderizar(){
- const termo=buscaEl.value.toLowerCase().trim();
- const filtrados=clientes.filter(c=>[c.nome,c.cpf_cnpj,c.telefone,c.email].some(v=>String(v||'').toLowerCase().includes(termo)));
- totalEl.textContent=`${filtrados.length} ${filtrados.length===1?'cliente':'clientes'}`;
- if(!filtrados.length){listaEl.innerHTML='<div class="clientes-vazio"><strong>Nenhum cliente encontrado</strong><span>Tente buscar por outro nome, CPF/CNPJ, telefone ou e-mail.</span></div>';return;}
- listaEl.innerHTML=filtrados.map(c=>`<article class="cliente-card">
+async function pesquisarClientes(){
+ listaEl.innerHTML='<div class="clientes-vazio">Pesquisando clientes...</div>';
+ let query=db.from('clientes').select('id,nome,cpf_cnpj,telefone,email,created_at').order('nome');
+ if(filtros.nome.value.trim())query=query.ilike('nome',`%${filtros.nome.value.trim()}%`);
+ if(filtros.cpf.value.trim())query=query.ilike('cpf_cnpj',`%${filtros.cpf.value.trim()}%`);
+ if(filtros.telefone.value.trim())query=query.ilike('telefone',`%${filtros.telefone.value.trim()}%`);
+ if(filtros.email.value.trim())query=query.ilike('email',`%${filtros.email.value.trim()}%`);
+ if(filtros.data.value)query=query.gte('created_at',`${filtros.data.value}T00:00:00`).lt('created_at',`${filtros.data.value}T23:59:59.999`);
+ const {data,error}=await query;
+ if(error){console.error(error);listaEl.innerHTML='<div class="erro-tabela">Não foi possível pesquisar os clientes.</div>';return;}
+ const clientes=data||[];
+ const ids=clientes.map(c=>c.id);
+ let pedidos=[];
+ if(ids.length){const r=await db.from('pedidos').select('id,cliente_id,valor_total').in('cliente_id',ids);if(!r.error)pedidos=r.data||[];}
+ renderizar(clientes,pedidos);
+}
+
+function renderizar(clientes,pedidos){
+ if(!clientes.length){listaEl.innerHTML='<div class="clientes-vazio"><strong>Nenhum cliente encontrado</strong><span>Tente alterar os filtros da pesquisa.</span></div>';return;}
+ listaEl.innerHTML=clientes.map(c=>{
+  const ps=pedidos.filter(p=>p.cliente_id===c.id);
+  const total=ps.reduce((s,p)=>s+Number(p.valor_total||0),0);
+  const dataCadastro=c.created_at?new Date(c.created_at).toLocaleDateString('pt-BR'):'—';
+  return `<article class="cliente-card">
  <div class="cliente-identidade"><div class="cliente-avatar">${esc(inicial(c.nome))}</div><div><h3>${esc(c.nome||'Sem nome')}</h3><p>${esc(c.cpf_cnpj||'CPF/CNPJ não informado')}</p></div></div>
- <div class="cliente-info"><div><small>Telefone</small><strong>${esc(c.telefone||'—')}</strong></div><div><small>E-mail</small><strong>${esc(c.email||'—')}</strong></div></div>
- <div class="cliente-metricas"><div><small>Pedidos</small><strong>${c.pedidos}</strong></div><div><small>Total comprado</small><strong>${formatarBRL(c.total)}</strong></div></div>
+ <div class="cliente-info"><div><small>Telefone</small><strong>${esc(c.telefone||'—')}</strong></div><div><small>E-mail</small><strong>${esc(c.email||'—')}</strong></div><div><small>Data de cadastro</small><strong>${dataCadastro}</strong></div></div>
+ <div class="cliente-metricas"><div><small>Pedidos</small><strong>${ps.length}</strong></div><div><small>Total comprado</small><strong>${formatarBRL(total)}</strong></div></div>
  <button class="cliente-expandir" data-id="${c.id}" aria-expanded="false">+</button>
  <div class="cliente-detalhes" id="cliente-${c.id}"></div>
- </article>`).join('');
+ </article>`;
+ }).join('');
  document.querySelectorAll('.cliente-expandir').forEach(btn=>btn.addEventListener('click',()=>alternarDetalhes(btn)));
 }
 
@@ -49,5 +67,6 @@ async function alternarDetalhes(btn){
  box.dataset.carregado='true';
 }
 
-buscaEl.addEventListener('input',renderizar);
-carregarClientes();
+document.getElementById('pesquisarClientes').addEventListener('click',pesquisarClientes);
+document.getElementById('limparFiltros').addEventListener('click',limparFiltros);
+Object.values(filtros).forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter')pesquisarClientes();}));
