@@ -18,16 +18,28 @@
 </aside>
 <main>
 <header><h1>Painel Administrativo</h1><p>Acompanhamento de vendas, entregas e financeiro</p></header>
-<section class="cards">
-<div class="card"><h3>Pedidos novos</h3><span>0</span></div>
-<div class="card"><h3>Reservados</h3><span>0</span></div>
-<div class="card"><h3>Prontos para entrega</h3><span>0</span></div>
-<div class="card"><h3>Entregues</h3><span>0</span></div>
-<div class="card"><h3>A receber</h3><span>R$ 0,00</span></div>
-<div class="card"><h3>Pagamento na entrega</h3><span>0</span></div>
+<section class="dashboard-status-cards">
+  <article class="dashboard-card dashboard-entrega">
+    <div class="dashboard-card-header"><div><span class="dashboard-kicker">OPERAÇÃO</span><h2>🚚 Status de entrega</h2></div><span class="dashboard-total" id="totalEntrega">0</span></div>
+    <div class="dashboard-status-list" id="statusEntrega">
+      <div class="dashboard-status-row"><span class="status-badge entrega-pendente">Pendente</span><strong>0</strong></div>
+      <div class="dashboard-status-row"><span class="status-badge entrega-reservado">Reservado</span><strong>0</strong></div>
+      <div class="dashboard-status-row"><span class="status-badge entrega-aguardando-entrega">Aguardando entrega</span><strong>0</strong></div>
+      <div class="dashboard-status-row"><span class="status-badge entrega-concluido">Concluído</span><strong>0</strong></div>
+    </div>
+  </article>
+  <article class="dashboard-card dashboard-financeiro">
+    <div class="dashboard-card-header"><div><span class="dashboard-kicker">FINANCEIRO</span><h2>💰 Status financeiro</h2></div><span class="dashboard-total" id="totalFinanceiro">0</span></div>
+    <div class="dashboard-status-list" id="statusFinanceiro">
+      <div class="dashboard-status-row"><span class="status-badge financeiro-pendente">Pendente</span><strong>0</strong></div>
+      <div class="dashboard-status-row"><span class="status-badge financeiro-pagamento-na-entrega">Pagamento na entrega</span><strong>0</strong></div>
+      <div class="dashboard-status-row"><span class="status-badge financeiro-pago">Pago</span><strong>0</strong></div>
+    </div>
+  </article>
 </section>
 </main>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/dashboard.js"></script>
 </body>
 </html>
