@@ -1,7 +1,3 @@
-const SUPABASE_URL = 'https://hpjiwmmslyvuqrkllmvb.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_bx1NzXS3nlgFK-te-Nuk9g_6n0j4htx';
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 const dataInicial = document.getElementById('dataInicial');
 const dataFinal = document.getElementById('dataFinal');
 const aplicarFiltro = document.getElementById('aplicarFiltro');
@@ -58,8 +54,6 @@ async function carregarDashboard() {
   aplicarFiltro.textContent = 'Carregando...';
 
   try {
-    // created_at é a data de criação do pedido. O fim usa o início do dia seguinte
-    // para incluir todos os pedidos feitos durante a data final.
     const fimExclusivo = new Date(`${fim}T00:00:00`);
     fimExclusivo.setDate(fimExclusivo.getDate() + 1);
 
