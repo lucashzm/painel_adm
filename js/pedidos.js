@@ -107,7 +107,7 @@ async function carregarDetalhes(id,tr){
   <section class="detalhe-card detalhe-produtos"><h4>Produtos</h4>${itens.length?itens.map(i=>`<div class="produto-linha"><span>${escapar(i.produto)}</span><span>Qtd. ${escapar(i.quantidade)} · ${formatarBRL(i.valor_unitario)}</span></div>`).join(''):'<p>Nenhum item encontrado.</p>'}</section>
  </div>
  <section class="detalhe-card detalhe-observacoes"><h4>Observações</h4><p>${escapar(data.observacoes)||'Nenhuma observação.'}</p></section>
- <div class="detalhe-documentos"><strong>Documentos</strong><div class="detalhe-documentos-acoes"><button type="button" class="btn btn-pesquisar" data-documento="pedido-venda" data-id="${data.id}">Gerar pedido de venda</button><button type="button" class="btn btn-limpar" data-documento="entrega" data-id="${data.id}">Gerar documento de entrega</button></div></div>`;
+ <div class="detalhe-documentos"><strong>Documentos</strong><div class="detalhe-documentos-acoes"><button type="button" class="btn btn-pesquisar" data-documento="pedido-venda" data-id="${data.id}">Gerar Pedido de Venda</button><button type="button" class="btn btn-limpar" data-documento="entrega" data-id="${data.id}">Gerar Documento de Entrega</button></div></div>`;
 }
 
 async function gerarDocumentoAPartirDoPedido(btn){
