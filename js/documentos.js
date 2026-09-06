@@ -1,6 +1,4 @@
-const SUPABASE_URL='https://hpjiwmmslyvuqrkllmvb.supabase.co';
-const SUPABASE_KEY='sb_publishable_bx1NzXS3nlgFK-te-Nuk9g_6n0j4htx';
-const dbDocumentos=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const dbDocumentos = db;
 
 function formatarBRLDocumento(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 function formatarDataBRDocumento(d){if(!d)return '';const [a,m,di]=String(d).split('-');return `${di}/${m}/${a}`;}
