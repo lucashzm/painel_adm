@@ -103,10 +103,29 @@ async function carregarDetalhes(id,tr){
  <div class="detalhes-grid">
   <section class="detalhe-card"><h4>Cliente</h4><p><strong>${escapar(data.clientes?.nome)}</strong></p><p>CPF/CNPJ: ${escapar(data.clientes?.cpf_cnpj)}</p><p>Telefone: ${escapar(data.clientes?.telefone)}</p><p>E-mail: ${escapar(data.clientes?.email)}</p></section>
   <section class="detalhe-card"><h4>Entrega</h4><p>${escapar(data.endereco)}</p><p>Referência: ${escapar(data.referencia)}</p><p>Previsão: ${escapar(data.previsao_entrega)}</p><p>Status: <span class="${classeStatus(data.status_entrega,'entrega')}">${escapar(data.status_entrega)}</span></p></section>
-  <section class="detalhe-card"><h4>Financeiro</h4><p>Forma de pagamento: ${escapar(data.forma_pagamento)}</p><p>Frete: ${formatarBRL(data.frete)}</p><p>Total: <strong>${formatarBRL(data.valor_total)}</strong></p><p>Status: <span class="${classeStatus(data.status_financeiro,'financeiro')}">${escapar(data.status_financeiro)}</span></p></section>
+  <section class="detalhe-card"><h4>Financeiro</h4><p>Forma de pagamento: ${escapar(data.forma_pagamento)}</p><p>Frete: ${formatarBRL(data.frete)}</p><p>Desconto: ${formatarBRL(data.desconto)}</p><p>Total: <strong>${formatarBRL(data.valor_total)}</strong></p><p>Status: <span class="${classeStatus(data.status_financeiro,'financeiro')}">${escapar(data.status_financeiro)}</span></p></section>
   <section class="detalhe-card detalhe-produtos"><h4>Produtos</h4>${itens.length?itens.map(i=>`<div class="produto-linha"><span>${escapar(i.produto)}</span><span>Qtd. ${escapar(i.quantidade)} · ${formatarBRL(i.valor_unitario)}</span></div>`).join(''):'<p>Nenhum item encontrado.</p>'}</section>
  </div>
- <section class="detalhe-card detalhe-observacoes"><h4>Observações</h4><p>${escapar(data.observacoes)||'Nenhuma observação.'}</p></section>`;
+ <section class="detalhe-card detalhe-observacoes"><h4>Observações</h4><p>${escapar(data.observacoes)||'Nenhuma observação.'}</p></section>
+ <div class="detalhe-documentos"><strong>Documentos</strong><div class="detalhe-documentos-acoes"><button type="button" class="btn btn-pesquisar" data-documento="pedido-venda" data-id="${data.id}">Gerar pedido de venda</button><button type="button" class="btn btn-limpar" data-documento="entrega" data-id="${data.id}">Gerar documento de entrega</button></div></div>`;
+}
+
+async function gerarDocumentoAPartirDoPedido(btn){
+ const id=btn.dataset.id;
+ const tipo=btn.dataset.documento;
+ const textoOriginal=btn.textContent;
+ btn.disabled=true;
+ btn.textContent='Gerando...';
+ try{
+   if(tipo==='pedido-venda')await gerarPedidoVendaPainel(id);
+   if(tipo==='entrega')await gerarDocumentoEntregaPainel(id);
+ }catch(e){
+   console.error('Erro ao gerar documento:',e);
+   alert('Não foi possível gerar o documento. Veja o console.');
+ }finally{
+   btn.disabled=false;
+   btn.textContent=textoOriginal;
+ }
 }
 
 async function pesquisarPedidos(){
@@ -144,6 +163,7 @@ tabelaPedidos.addEventListener('click',e=>{
  const btn=e.target.closest('button');
  if(!btn)return;
  const id=btn.dataset.id||btn.dataset.detalhes;
+ if(btn.dataset.documento){gerarDocumentoAPartirDoPedido(btn);return;}
  if(btn.dataset.statusCampo){
    const linha=btn.closest('tr');
    const coluna=btn.dataset.statusCampo==='status_entrega'?5:6;
