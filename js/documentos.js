@@ -90,19 +90,22 @@ async function gerarDocumentoEntregaPainel(idPedido){
  const {doc,margem}=base;
  let y=base.getY();
 
- base.secao('CONFERÊNCIA DA ENTREGA');
+ base.secao('CONFERÊNCIA NO RECEBIMENTO');
  doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(70,70,70);
- const conferencia=doc.splitTextToSize('Os produtos relacionados acima foram conferidos no momento da entrega.',170);
- doc.text(conferencia,margem,y);y+=(conferencia.length*5)+9;
+ const conferencia='Declaro que os produtos relacionados acima foram conferidos no momento do recebimento, estando de acordo com o pedido e em condições aparentes de conformidade.';
+ const linhasConferencia=doc.splitTextToSize(conferencia,170);
+ doc.text(linhasConferencia,margem,y);
+ y+=(linhasConferencia.length*5)+11;
 
- doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(55,55,55);doc.text('DECLARAÇÃO DE RECEBIMENTO',margem,y);y+=7;
+ base.secao('DECLARAÇÃO DE RECEBIMENTO');
  doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(70,70,70);
- const declaracao=doc.splitTextToSize('Declaro que recebi os produtos relacionados neste documento de entrega, conferidos no momento do recebimento e em condições aparentes de conformidade.',170);
- doc.text(declaracao,margem,y);y+=(declaracao.length*5)+13;
+ const recebimento='Declaro que recebi os produtos relacionados neste documento de entrega, conforme especificações descritas acima.';
+ const linhasRecebimento=doc.splitTextToSize(recebimento,170);
+ doc.text(linhasRecebimento,margem,y);
+ y+=(linhasRecebimento.length*5)+13;
 
  doc.setDrawColor(180,180,180);doc.setLineWidth(.3);doc.line(30,y,95,y);doc.line(115,y,180,y);y+=6;
  doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(90,90,90);doc.text('Assinatura do cliente',62.5,y,{align:'center'});doc.text('Assinatura do entregador',147.5,y,{align:'center'});y+=11;
-
  doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(55,55,55);doc.text('Data do recebimento:',margem,y);
  doc.setFont('helvetica','normal');doc.text('____/____/________',margem+38,y);y+=18;
  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(155,155,155);doc.text('Documento de entrega • Decoralar',105,y,{align:'center'});
