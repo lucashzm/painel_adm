@@ -1,6 +1,3 @@
-const SUPABASE_URL='https://hpjiwmmslyvuqrkllmvb.supabase.co';
-const SUPABASE_KEY='sb_publishable_bx1NzXS3nlgFK-te-Nuk9g_6n0j4htx';
-const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const tabelaPedidos=document.getElementById('listaPedidos');
 const botaoPesquisar=document.getElementById('pesquisarPedidos');
 const botaoLimpar=document.getElementById('limparFiltros');
