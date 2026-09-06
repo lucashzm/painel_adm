@@ -14,59 +14,98 @@ async function buscarDadosDocumento(idPedido){
  return {pedido,itens:itens||[],cliente};
 }
 
-function montarBasePDF(tituloDocumento,pedido,itens,cliente){
+function criarDocumentoVisual(pedido,itens,cliente,tituloDocumento){
  const {jsPDF}=window.jspdf;
  const doc=new jsPDF();
- const margem=15;
- let y=15;
- const titulo=t=>{doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text(t,margem,y);y+=7;};
- const campo=(label,valor)=>{doc.setFont('helvetica','bold');doc.text(label,margem,y);const x=margem+doc.getTextWidth(label);doc.setFont('helvetica','normal');doc.text(textoDocumento(valor),x,y);y+=6;};
- const linha=()=>{doc.line(margem,y,195,y);y+=8;};
- doc.setFont('helvetica','bold');doc.setFontSize(18);doc.text('DECORALAR',margem,y);
- doc.setFontSize(15);doc.text(tituloDocumento,195,y,{align:'right'});y+=10;
- doc.setFontSize(11);doc.text(`Pedido Nº ${pedido.numero_pedido}`,margem,y);y+=8;linha();
- titulo('CLIENTE');doc.setFont('helvetica','normal');doc.setFontSize(10);
- campo('Nome: ',cliente?.nome||'');
- campo('CPF/CNPJ: ',cliente?.cpf_cnpj||pedido.cliente_cpf_cnpj||'');
- campo('Telefone: ',cliente?.telefone||'');
- campo('Email: ',cliente?.email||'');
- y+=4;
- titulo('ENDEREÇO DE ENTREGA');
+ const margem=18;
+ const direita=192;
+ let y=18;
+ const corTexto=[55,55,55];
+ const corCinza=[105,105,105];
+ const corLinha=[220,220,220];
+ const formatarCampo=(label,valor,x,yPos)=>{
+   doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(...corTexto);doc.text(label,x,yPos);
+   const largura=doc.getTextWidth(label);
+   doc.setFont('helvetica','normal');doc.text(textoDocumento(valor)||'—',x+largura+3,yPos);
+ };
+ const secao=t=>{doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...corCinza);doc.text(t,margem,y);y+=7;};
+ const linha=(espaco=8)=>{doc.setDrawColor(...corLinha);doc.setLineWidth(.25);doc.line(margem,y,direita,y);y+=espaco;};
+
+ doc.setFont('helvetica','bold');doc.setFontSize(21);doc.setTextColor(50,50,50);doc.text('DECORALAR',margem,y);
+ doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(145,145,145);doc.text(tituloDocumento,direita,y-5,{align:'right'});
+ doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(55,55,55);doc.text(`Nº ${pedido.numero_pedido}`,direita,y+3,{align:'right'});
+ y+=11;doc.setDrawColor(55,55,55);doc.setLineWidth(.55);doc.line(margem,y,direita,y);y+=12;
+
+ secao('DADOS DO CLIENTE');
+ doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(55,55,55);doc.text(cliente?.nome||'—',margem,y);y+=7;
+ formatarCampo('CPF/CNPJ:',cliente?.cpf_cnpj||pedido.cliente_cpf_cnpj||'',margem,y);
+ formatarCampo('Telefone:',cliente?.telefone||'',105,y);y+=6;
+ formatarCampo('E-mail:',cliente?.email||'',margem,y);y+=11;
+
+ secao('DADOS DE ENTREGA');
  const e=(pedido.endereco||'').split(',').map(x=>x.trim());
- campo('Rua: ',`${e[1]||''}   Nº: ${e[2]||''}`);
- campo('Bairro: ',e[3]||'');
- campo('CEP: ',e[0]||'');
- campo('Cidade: ',e[4]||'');
- campo('Referência: ',pedido.referencia||'');
- doc.setFont('helvetica','bold');doc.text('Observações de entrega:',margem,y);y+=5;
- doc.setFont('helvetica','normal');const obsEntrega=doc.splitTextToSize(pedido.observacoes||'',170);doc.text(obsEntrega,margem,y);y+=(obsEntrega.length*4)+5;
- doc.setFont('helvetica','bold');doc.text('Previsão de entrega: ',margem,y);const xPrev=margem+doc.getTextWidth('Previsão de entrega: ');doc.setFont('helvetica','normal');doc.text(formatarDataBRDocumento(pedido.previsao_entrega),xPrev,y);y+=10;
- titulo('PRODUTOS');doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text('Produto',margem,y);doc.text('Qtd',150,y);doc.text('Valor',170,y);y+=6;linha();
- itens.forEach(i=>{doc.setFont('helvetica','bold');const l=doc.splitTextToSize(i.produto,120);doc.text(l,margem,y);doc.setFont('helvetica','normal');doc.text(String(i.quantidade),150,y);doc.text(formatarBRLDocumento(i.valor_unitario),170,y);y+=(l.length*5)+5;});
- linha();titulo('RESUMO FINANCEIRO');campo('Forma de pagamento: ',pedido.forma_pagamento||'');campo('Frete: ',formatarBRLDocumento(Math.abs(Number(pedido.frete||0))));campo('Desconto: ',formatarBRLDocumento(Math.abs(Number(pedido.desconto||0))));
- doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text(`TOTAL DO PEDIDO: ${formatarBRLDocumento(pedido.valor_total||0)}`,margem,y);y+=12;
- return {doc,margem,getY:()=>y};
+ formatarCampo('Endereço:',`${e[1]||''}   Nº ${e[2]||''}`,margem,y);y+=6;
+ formatarCampo('Bairro:',e[3]||'',margem,y);y+=6;
+ formatarCampo('CEP:',e[0]||'',margem,y);y+=6;
+ formatarCampo('Cidade:',e[4]||'',margem,y);y+=6;
+ formatarCampo('Referência:',pedido.referencia||'',margem,y);y+=6;
+ formatarCampo('Observações:',pedido.observacoes||'',margem,y);y+=8;
+ formatarCampo('Previsão de entrega:',formatarDataBRDocumento(pedido.previsao_entrega)||'—',margem,y);y+=13;
+
+ secao('ITENS DO PEDIDO');
+ doc.setFillColor(247,247,247);doc.rect(margem,y-4,direita-margem,8,'F');
+ doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...corCinza);doc.text('DESCRIÇÃO',margem+3,y+1);doc.text('QTD',150,y+1);doc.text('VALOR UNIT.',direita-3,y+1,{align:'right'});y+=9;
+ itens.forEach((i,idx)=>{
+   doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(55,55,55);
+   const l=doc.splitTextToSize(textoDocumento(i.produto),120);
+   doc.text(l,margem+3,y);doc.text(String(i.quantidade),150,y);doc.text(formatarBRLDocumento(i.valor_unitario),direita-3,y,{align:'right'});
+   y+=(l.length*5)+6;
+   if(idx<itens.length-1){doc.setDrawColor(232,232,232);doc.setLineWidth(.2);doc.line(margem,y-3,direita,y-3);}
+ });
+ y+=2;linha(8);
+ return {doc,margem,direita,getY:()=>y,secao,linha};
 }
 
 async function gerarPedidoVendaPainel(idPedido){
  const {pedido,itens,cliente}=await buscarDadosDocumento(idPedido);
- const base=montarBasePDF('PEDIDO DE VENDA',pedido,itens,cliente);
- base.doc.setFontSize(8);base.doc.setFont('helvetica','normal');base.doc.text('Documento de pedido de venda - Decoralar',105,base.getY(),{align:'center'});
- base.doc.save(`Pedido_Venda_${pedido.numero_pedido}.pdf`);
+ const base=criarDocumentoVisual(pedido,itens,cliente,'PEDIDO DE VENDA');
+ const {doc,margem,direita}=base;
+ let y=base.getY();
+ base.secao('RESUMO');
+ doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(55,55,55);doc.text('Forma de pagamento:',margem,y);
+ const xForma=margem+doc.getTextWidth('Forma de pagamento:');
+ doc.setFont('helvetica','normal');doc.text(pedido.forma_pagamento||'—',xForma+3,y);
+ doc.text('Frete',125,y);doc.text(formatarBRLDocumento(Math.abs(Number(pedido.frete||0))),direita,y,{align:'right'});y+=7;
+ doc.text('Desconto',125,y);doc.text(formatarBRLDocumento(Math.abs(Number(pedido.desconto||0))),direita,y,{align:'right'});y+=13;
+ doc.setFillColor(70,70,70);doc.roundedRect(108,y-5,direita-108,18,2,2,'F');
+ doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(255,255,255);doc.text('TOTAL DO PEDIDO',114,y+2);
+ doc.setFontSize(13);doc.text(formatarBRLDocumento(pedido.valor_total||0),direita-5,y+2,{align:'right'});y+=25;
+ doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(155,155,155);doc.text('Pedido de venda • Decoralar',105,y,{align:'center'});
+ doc.save(`Pedido_Venda_${pedido.numero_pedido}.pdf`);
 }
 
 async function gerarDocumentoEntregaPainel(idPedido){
  const {pedido,itens,cliente}=await buscarDadosDocumento(idPedido);
- const base=montarBasePDF('DOCUMENTO DE ENTREGA',pedido,itens,cliente);
+ const base=criarDocumentoVisual(pedido,itens,cliente,'DOCUMENTO DE ENTREGA');
+ const {doc,margem}=base;
  let y=base.getY();
- const doc=base.doc;
- const margem=base.margem;
- const titulo=t=>{doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text(t,margem,y);y+=7;};
- titulo('DECLARAÇÃO DE RECEBIMENTO');
- doc.setFont('helvetica','normal');doc.setFontSize(9);
- const info=['Declaro que recebi os produtos relacionados neste documento de entrega, conforme especificações descritas acima.','Declaro que os produtos foram conferidos no momento do recebimento, não sendo constatadas avarias aparentes.'];
- info.forEach(t=>{const l=doc.splitTextToSize('• '+t,170);doc.text(l,margem,y);y+=(l.length*4)+3;});
- y+=10;doc.line(30,y,180,y);y+=7;doc.setFontSize(10);doc.text('Assinatura do Cliente',105,y,{align:'center'});y+=10;doc.setFontSize(10);doc.setFont('helvetica','bold');doc.text('Data do recebimento: ',margem,y);const xData=margem+doc.getTextWidth('Data do recebimento: ');doc.setFont('helvetica','normal');doc.text('____/____/________',xData,y);y+=12;doc.setFontSize(8);doc.text('Documento de entrega - Decoralar',105,y,{align:'center'});
+
+ base.secao('CONFERÊNCIA DA ENTREGA');
+ doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(70,70,70);
+ const conferencia=doc.splitTextToSize('Os produtos relacionados acima foram conferidos no momento da entrega.',170);
+ doc.text(conferencia,margem,y);y+=(conferencia.length*5)+9;
+
+ doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(55,55,55);doc.text('DECLARAÇÃO DE RECEBIMENTO',margem,y);y+=7;
+ doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(70,70,70);
+ const declaracao=doc.splitTextToSize('Declaro que recebi os produtos relacionados neste documento de entrega, conferidos no momento do recebimento e em condições aparentes de conformidade.',170);
+ doc.text(declaracao,margem,y);y+=(declaracao.length*5)+13;
+
+ doc.setDrawColor(180,180,180);doc.setLineWidth(.3);doc.line(30,y,95,y);doc.line(115,y,180,y);y+=6;
+ doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(90,90,90);doc.text('Assinatura do cliente',62.5,y,{align:'center'});doc.text('Assinatura do entregador',147.5,y,{align:'center'});y+=11;
+
+ doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(55,55,55);doc.text('Data do recebimento:',margem,y);
+ doc.setFont('helvetica','normal');doc.text('____/____/________',margem+38,y);y+=18;
+ doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(155,155,155);doc.text('Documento de entrega • Decoralar',105,y,{align:'center'});
  doc.save(`Documento_Entrega_${pedido.numero_pedido}.pdf`);
 }
 
