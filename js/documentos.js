@@ -88,21 +88,22 @@ async function gerarDocumentoEntregaPainel(idPedido){
  const {pedido,itens,cliente}=await buscarDadosDocumento(idPedido);
  const base=criarDocumentoVisual(pedido,itens,cliente,'DOCUMENTO DE ENTREGA');
  const {doc,margem}=base;
- let y=base.getY()+3;
-
- doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(85,85,85);
- doc.text('CONFERÊNCIA NO RECEBIMENTO',margem,y);y+=8;
- doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(70,70,70);
- const conferencia='Declaro que os produtos relacionados acima foram conferidos no momento do recebimento, estando de acordo com o pedido e em condições aparentes de conformidade.';
- const linhasConferencia=doc.splitTextToSize(conferencia,170);
- doc.text(linhasConferencia,margem,y);y+=(linhasConferencia.length*5)+14;
+ let y=base.getY()+8;
 
  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(85,85,85);
  doc.text('DECLARAÇÃO DE RECEBIMENTO',margem,y);y+=8;
+
  doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(70,70,70);
- const recebimento='Declaro que recebi os produtos relacionados neste documento de entrega, conforme especificações descritas acima.';
- const linhasRecebimento=doc.splitTextToSize(recebimento,170);
- doc.text(linhasRecebimento,margem,y);y+=(linhasRecebimento.length*5)+18;
+ const declaracoes=[
+   'Declaro que recebi os produtos relacionados neste documento de entrega, conforme especificações descritas acima.',
+   'Declaro que os produtos foram conferidos no momento do recebimento, não sendo constatadas avarias aparentes.'
+ ];
+ declaracoes.forEach(frase=>{
+   const linhas=doc.splitTextToSize(`• ${frase}`,170);
+   doc.text(linhas,margem,y);
+   y+=(linhas.length*5)+6;
+ });
+ y+=8;
 
  doc.setDrawColor(180,180,180);doc.setLineWidth(.3);doc.line(30,y,95,y);doc.line(115,y,180,y);y+=6;
  doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(90,90,90);
