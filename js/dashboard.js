@@ -3,7 +3,7 @@ const dataFinal = document.getElementById('dataFinal');
 const aplicarFiltro = document.getElementById('aplicarFiltro');
 const ultimos30 = document.getElementById('ultimos30');
 
-const STATUS_ENTREGA = ['Pendente', 'Reservado', 'Aguardando entrega', 'Concluído'];
+const STATUS_ENTREGA = ['Pendente', 'Reservado', 'Aguardando entrega', 'Concluído', 'Cancelado'];
 const STATUS_FINANCEIRO = ['Pendente', 'Pagamento na entrega', 'Pago'];
 
 function dataLocalISO(data = new Date()) {
