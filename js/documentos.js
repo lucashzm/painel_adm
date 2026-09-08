@@ -31,7 +31,7 @@ function criarDocumentoVisual(pedido,itens,cliente,tituloDocumento){
  const secao=t=>{doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...corCinza);doc.text(t,margem,y);y+=7;};
  const linha=(espaco=8)=>{doc.setDrawColor(...corLinha);doc.setLineWidth(.25);doc.line(margem,y,direita,y);y+=espaco;};
 
- doc.setFont('helvetica','bold');doc.setFontSize(21);doc.setTextColor(50,50,50);doc.text('DECORALAR',margem,y);
+ doc.setFont('helvetica','bold');doc.setFontSize(21);doc.setTextColor(50,50,50);doc.text('BM MÓVEIS',margem,y);
  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(145,145,145);doc.text(tituloDocumento,direita,y-5,{align:'right'});
  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(55,55,55);doc.text(`Nº ${pedido.numero_pedido}`,direita,y+3,{align:'right'});
  y+=11;doc.setDrawColor(55,55,55);doc.setLineWidth(.55);doc.line(margem,y,direita,y);y+=12;
@@ -80,7 +80,7 @@ async function gerarPedidoVendaPainel(idPedido){
  doc.setFillColor(70,70,70);doc.roundedRect(108,y-5,direita-108,18,2,2,'F');
  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(255,255,255);doc.text('TOTAL DO PEDIDO',114,y+2);
  doc.setFontSize(13);doc.text(formatarBRLDocumento(pedido.valor_total||0),direita-5,y+2,{align:'right'});y+=25;
- doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(155,155,155);doc.text('Pedido de venda • Decoralar',105,y,{align:'center'});
+ doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(155,155,155);doc.text('Pedido de venda • BM Móveis',105,y,{align:'center'});
  doc.save(`Pedido_Venda_${pedido.numero_pedido}.pdf`);
 }
 
@@ -110,7 +110,7 @@ async function gerarDocumentoEntregaPainel(idPedido){
  doc.text('Assinatura do cliente',62.5,y,{align:'center'});doc.text('Assinatura do entregador',147.5,y,{align:'center'});y+=12;
  doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(55,55,55);doc.text('Data do recebimento:',margem,y);
  doc.setFont('helvetica','normal');doc.text('____/____/________',margem+38,y);y+=22;
- doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(155,155,155);doc.text('Documento de entrega • Decoralar',105,y,{align:'center'});
+ doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(155,155,155);doc.text('Documento de entrega • BM Móveis',105,y,{align:'center'});
  doc.save(`Documento_Entrega_${pedido.numero_pedido}.pdf`);
 }
 
