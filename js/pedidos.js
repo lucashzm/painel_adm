@@ -168,7 +168,7 @@ tabelaPedidos.addEventListener('click',e=>{
  if(btn.dataset.documento){gerarDocumentoAPartirDoPedido(btn);return;}
  if(btn.dataset.statusCampo){
    const linha=btn.closest('tr');
-   const coluna=btn.dataset.statusCampo==='status_entrega'?5:6;
+   const coluna=btn.dataset.statusCampo==='status_entrega'?4:5;
    const atual=linha?.cells[coluna]?.querySelector('.status-badge')?.textContent.trim()||'';
    mostrarModalStatus(id,btn.dataset.statusCampo,atual);
  }
