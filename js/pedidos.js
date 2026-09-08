@@ -3,7 +3,7 @@ const botaoPesquisar=document.getElementById('pesquisarPedidos');
 const botaoLimpar=document.getElementById('limparFiltros');
 const modalStatus=document.getElementById('modalStatus');
 
-const STATUS_ENTREGA=['Pendente','Reservado','Aguardando entrega','Concluído'];
+const STATUS_ENTREGA=['Pendente','Reservado','Aguardando entrega','Concluído','Cancelado'];
 const STATUS_FINANCEIRO=['Pendente','Pagamento na entrega','Pago'];
 const formatarBRL=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const escapar=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -24,7 +24,7 @@ function mostrarModalStatus(id,campo,atual){
     </div>
     <p class="modal-atual">Status atual: <strong>${escapar(atual)}</strong></p>
     <div class="opcoes-status">
-      ${opcoes.map(o=>`<button type="button" class="opcao-status ${o===atual?'selecionado':''}" data-status-opcao="${escapar(o)}">${escapar(o)}</button>`).join('')}
+      ${opcoes.map(o=>`<button type="button" class="opcao-status ${o===atual?'selecionado':''} ${o==='Cancelado'?'opcao-status-cancelado':''}" data-status-opcao="${escapar(o)}">${escapar(o)}</button>`).join('')}
     </div>
     <label class="campo-senha">Senha para confirmar a alteração
       <input id="senhaStatus" type="password" autocomplete="current-password" placeholder="Digite sua senha">
