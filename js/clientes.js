@@ -1,7 +1,3 @@
-const SUPABASE_URL='https://hpjiwmmslyvuqrkllmvb.supabase.co';
-const SUPABASE_KEY='sb_publishable_bx1NzXS3nlgFK-te-Nuk9g_6n0j4htx';
-const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-
 const listaEl=document.getElementById('listaClientes');
 const filtros={
  nome:document.getElementById('filtroNome'),
@@ -12,9 +8,8 @@ const filtros={
 };
 
 function formatarBRL(valor){return Number(valor||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function esc(v){return String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[c]));}
 function inicial(nome){return (String(nome||'?').trim()[0]||'?').toUpperCase();}
-function normalizar(v){return String(v||'').toLowerCase().trim();}
 
 function limparFiltros(){
  Object.values(filtros).forEach(el=>el.value='');
