@@ -10,6 +10,7 @@ const filtros={
 function formatarBRL(valor){return Number(valor||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 function esc(v){return String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[c]));}
 function inicial(nome){return (String(nome||'?').trim()[0]||'?').toUpperCase();}
+function normalizarCpfCnpj(valor){return String(valor||'').replace(/\D/g,'');}
 
 function limparFiltros(){
  Object.values(filtros).forEach(el=>el.value='');
@@ -20,7 +21,8 @@ async function pesquisarClientes(){
  listaEl.innerHTML='<div class="clientes-vazio">Pesquisando clientes...</div>';
  let query=db.from('clientes').select('id,nome,cpf_cnpj,telefone,email,created_at').order('nome');
  if(filtros.nome.value.trim())query=query.ilike('nome',`%${filtros.nome.value.trim()}%`);
- if(filtros.cpf.value.trim())query=query.ilike('cpf_cnpj',`%${filtros.cpf.value.trim()}%`);
+ const cpf=normalizarCpfCnpj(filtros.cpf.value);
+ if(cpf)query=query.ilike('cpf_cnpj',`%${cpf}%`);
  if(filtros.telefone.value.trim())query=query.ilike('telefone',`%${filtros.telefone.value.trim()}%`);
  if(filtros.email.value.trim())query=query.ilike('email',`%${filtros.email.value.trim()}%`);
  if(filtros.data.value)query=query.gte('created_at',`${filtros.data.value}T00:00:00`).lt('created_at',`${filtros.data.value}T23:59:59.999`);
