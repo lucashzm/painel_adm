@@ -4,7 +4,7 @@ const botaoLimpar=document.getElementById('limparFiltros');
 const modalStatus=document.getElementById('modalStatus');
 
 const STATUS_ENTREGA=['Pendente','Reservado','Aguardando entrega','Concluído','Cancelado'];
-const STATUS_FINANCEIRO=['Pendente','Pagamento na entrega','Pago'];
+const STATUS_FINANCEIRO=['Pendente','Pagamento na entrega','Pago','Cancelado'];
 const formatarBRL=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const escapar=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
@@ -65,7 +65,12 @@ async function confirmarAlteracaoStatus(id,campo,novoStatus,senha){
    if(userError||!user)throw new Error('Usuário não autenticado.');
    const login=await db.auth.signInWithPassword({email:user.email,password:senha});
    if(login.error)throw new Error('Senha inválida.');
-   const {error:updateError}=await db.from('pedidos').update({[campo]:novoStatus}).eq('id',id);
+
+   const alteracoes={[campo]:novoStatus};
+   if(campo==='status_entrega'&&novoStatus==='Cancelado')alteracoes.status_financeiro='Cancelado';
+   if(campo==='status_financeiro'&&novoStatus==='Cancelado')alteracoes.status_entrega='Cancelado';
+
+   const {error:updateError}=await db.from('pedidos').update(alteracoes).eq('id',id);
    if(updateError)throw updateError;
    fecharModal();
    await pesquisarPedidos();
