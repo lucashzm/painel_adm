@@ -25,6 +25,10 @@ function contarPorStatus(pedidos, campo, status) {
   return pedidos.filter(p => p[campo] === status).length;
 }
 
+function contarAtivos(pedidos, campo) {
+  return pedidos.filter(p => p[campo] !== 'Cancelado').length;
+}
+
 function renderizar() {
   const linhasEntrega = document.querySelectorAll('#statusEntrega .dashboard-status-row');
   STATUS_ENTREGA.forEach((status, i) => {
@@ -36,8 +40,8 @@ function renderizar() {
     linhasFinanceiro[i].querySelector('strong').textContent = contarPorStatus(window.pedidosDashboard, 'status_financeiro', status);
   });
 
-  document.getElementById('totalEntrega').textContent = window.pedidosDashboard.length;
-  document.getElementById('totalFinanceiro').textContent = window.pedidosDashboard.length;
+  document.getElementById('totalEntrega').textContent = contarAtivos(window.pedidosDashboard, 'status_entrega');
+  document.getElementById('totalFinanceiro').textContent = contarAtivos(window.pedidosDashboard, 'status_financeiro');
 }
 
 async function carregarDashboard() {
