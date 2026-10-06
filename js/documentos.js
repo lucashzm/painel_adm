@@ -74,9 +74,9 @@ async function gerarPedidoVendaPainel(idPedido){
  base.secao('RESUMO');
  doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(55,55,55);doc.text('Forma de pagamento:',margem,y);
  const xForma=margem+doc.getTextWidth('Forma de pagamento:');
- doc.setFont('helvetica','normal');doc.text(pedido.forma_pagamento||'—',xForma+3,y);
+ doc.setFont('helvetica','normal');doc.text(`${pedido.forma_pagamento||'—'}${pedido.forma_pagamento==='Pix'?' (4% à vista)':''}`,xForma+3,y);
  doc.text('Frete',125,y);doc.text(formatarBRLDocumento(Math.abs(Number(pedido.frete||0))),direita,y,{align:'right'});y+=7;
- doc.text('Desconto',125,y);doc.text(formatarBRLDocumento(Math.abs(Number(pedido.desconto||0))),direita,y,{align:'right'});y+=13;
+ doc.text('Desconto total',125,y);doc.text(formatarBRLDocumento(Math.abs(Number(pedido.desconto||0))),direita,y,{align:'right'});y+=13;
  doc.setFillColor(70,70,70);doc.roundedRect(108,y-5,direita-108,18,2,2,'F');
  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(255,255,255);doc.text('TOTAL DO PEDIDO',114,y+2);
  doc.setFontSize(13);doc.text(formatarBRLDocumento(pedido.valor_total||0),direita-5,y+2,{align:'right'});y+=25;
