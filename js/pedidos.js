@@ -3,7 +3,7 @@ const botaoPesquisar=document.getElementById('pesquisarPedidos');
 const botaoLimpar=document.getElementById('limparFiltros');
 const modalStatus=document.getElementById('modalStatus');
 
-const STATUS_ENTREGA=['Pendente','Reservado','Aguardando entrega','Concluído','Cancelado'];
+const STATUS_ENTREGA=['Pendente','Reservado','Aguardando entrega','Concluído','Cancelado','Devolvido'];
 const STATUS_FINANCEIRO=['Pendente','Pagamento na entrega','Pago','Cancelado'];
 const formatarBRL=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const escapar=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
