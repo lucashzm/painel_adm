@@ -4,7 +4,7 @@ const aplicarFiltro = document.getElementById('aplicarFiltro');
 const ultimos30 = document.getElementById('ultimos30');
 
 const STATUS_ENTREGA = ['Pendente', 'Reservado', 'Aguardando recolhimento', 'Em trânsito', 'Concluído', 'Cancelado', 'Devolvido'];
-const STATUS_FINANCEIRO = ['Pendente', 'Pagamento na entrega', 'Pago', 'Cancelado'];
+const STATUS_FINANCEIRO = ['Pendente', 'Pagamento na entrega', 'Pago', 'Cancelado', 'Devolvido'];
 
 function dataLocalISO(data = new Date()) {
   const ano = data.getFullYear();
