@@ -16,14 +16,14 @@ function classeStatus(v,tipo){
 async function mostrarModalStatus(id,campo,atual){
  const entrega=campo==='status_entrega';
  const opcoes=entrega?STATUS_ENTREGA:STATUS_FINANCEIRO;
- let recebimento={recebido_por:'',data_entrega:''};
+ let recebimento={recebido_por:'',data_entrega:'',numero_pedido:id};
  if(entrega){
-   const {data}=await db.from('pedidos').select('recebido_por,data_entrega').eq('id',id).single();
+   const {data}=await db.from('pedidos').select('numero_pedido,recebido_por,data_entrega').eq('id',id).single();
    if(data)recebimento=data;
  }
  modalStatus.innerHTML=
   '<div class="modal-conteudo modal-status-conteudo" role="dialog" aria-modal="true">'+
-    '<div class="modal-cabecalho"><div><span class="modal-kicker">Pedido #'+escapar(id)+'</span><h2>Alterar '+(entrega?'status de entrega':'status financeiro')+'</h2></div><button type="button" class="modal-fechar" data-modal-fechar aria-label="Fechar">×</button></div>'+
+    '<div class="modal-cabecalho"><div><span class="modal-kicker">Pedido #'+escapar(recebimento.numero_pedido||id)+'</span><h2>Alterar '+(entrega?'status de entrega':'status financeiro')+'</h2></div><button type="button" class="modal-fechar" data-modal-fechar aria-label="Fechar">×</button></div>'+
     '<p class="modal-atual">Status atual: <strong>'+escapar(atual)+'</strong></p>'+
     '<div class="opcoes-status">'+opcoes.map(o=>'<button type="button" class="opcao-status '+(o===atual?'selecionado ':'')+(o==='Cancelado'?'opcao-status-cancelado':'')+'" data-status-opcao="'+escapar(o)+'">'+escapar(o)+'</button>').join('')+'</div>'+
     (entrega?'<div id="camposRecebimento" class="campos-recebimento" '+(atual==='Concluído'?'':'hidden')+'><div class="campo-recebimento"><label for="recebidoPor">Recebido por</label><input id="recebidoPor" type="text" value="'+escapar(recebimento.recebido_por||'')+'" placeholder="Ex.: João da Silva" autocomplete="off"></div><div class="campo-recebimento"><label for="dataEntrega">Data da entrega</label><input id="dataEntrega" type="date" value="'+escapar(recebimento.data_entrega||'')+'"></div><small class="ajuda-recebimento">Confirme o recebimento com base no documento de entrega assinado.</small></div>':'')+
