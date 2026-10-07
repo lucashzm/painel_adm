@@ -3,7 +3,7 @@ const botaoPesquisar=document.getElementById('pesquisarPedidos');
 const botaoLimpar=document.getElementById('limparFiltros');
 const modalStatus=document.getElementById('modalStatus');
 
-const STATUS_ENTREGA=['Pendente','Reservado','Aguardando entrega','Concluído','Cancelado','Devolvido'];
+const STATUS_ENTREGA=['Pendente','Reservado','Aguardando recolhimento','Em trânsito','Concluído','Cancelado','Devolvido'];
 const STATUS_FINANCEIRO=['Pendente','Pagamento na entrega','Pago','Cancelado','Devolvido'];
 const formatarBRL=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const escapar=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -13,39 +13,48 @@ function classeStatus(v,tipo){
  return `status-badge ${tipo}-${base}`;
 }
 
-function mostrarModalStatus(id,campo,atual){
+async function mostrarModalStatus(id,campo,atual){
  const entrega=campo==='status_entrega';
  const opcoes=entrega?STATUS_ENTREGA:STATUS_FINANCEIRO;
- modalStatus.innerHTML=`
-  <div class="modal-conteudo modal-status-conteudo" role="dialog" aria-modal="true">
-    <div class="modal-cabecalho">
-      <div><span class="modal-kicker">Pedido #${escapar(id)}</span><h2>Alterar ${entrega?'status de entrega':'status financeiro'}</h2></div>
-      <button type="button" class="modal-fechar" data-modal-fechar aria-label="Fechar">×</button>
-    </div>
-    <p class="modal-atual">Status atual: <strong>${escapar(atual)}</strong></p>
-    <div class="opcoes-status">
-      ${opcoes.map(o=>`<button type="button" class="opcao-status ${o===atual?'selecionado':''} ${o==='Cancelado'?'opcao-status-cancelado':''}" data-status-opcao="${escapar(o)}">${escapar(o)}</button>`).join('')}
-    </div>
-    <label class="campo-senha">Senha para confirmar a alteração
-      <input id="senhaStatus" type="password" autocomplete="current-password" placeholder="Digite sua senha">
-    </label>
-    <div id="erroStatus" class="erro-modal" hidden></div>
-    <div class="modal-acoes"><button type="button" class="btn btn-limpar" data-modal-fechar>Cancelar</button><button type="button" class="btn btn-pesquisar" id="confirmarStatus" disabled>Confirmar alteração</button></div>
-  </div>`;
+ let recebimento={recebido_por:'',data_entrega:''};
+ if(entrega){
+   const {data}=await db.from('pedidos').select('recebido_por,data_entrega').eq('id',id).single();
+   if(data)recebimento=data;
+ }
+ modalStatus.innerHTML=
+  '<div class="modal-conteudo modal-status-conteudo" role="dialog" aria-modal="true">'+
+    '<div class="modal-cabecalho"><div><span class="modal-kicker">Pedido #'+escapar(id)+'</span><h2>Alterar '+(entrega?'status de entrega':'status financeiro')+'</h2></div><button type="button" class="modal-fechar" data-modal-fechar aria-label="Fechar">×</button></div>'+
+    '<p class="modal-atual">Status atual: <strong>'+escapar(atual)+'</strong></p>'+
+    '<div class="opcoes-status">'+opcoes.map(o=>'<button type="button" class="opcao-status '+(o===atual?'selecionado ':'')+(o==='Cancelado'?'opcao-status-cancelado':'')+'" data-status-opcao="'+escapar(o)+'">'+escapar(o)+'</button>').join('')+'</div>'+
+    (entrega?'<div id="camposRecebimento" class="campos-recebimento" '+(atual==='Concluído'?'':'hidden')+'><div class="campo-recebimento"><label for="recebidoPor">Recebido por</label><input id="recebidoPor" type="text" value="'+escapar(recebimento.recebido_por||'')+'" placeholder="Ex.: João da Silva" autocomplete="off"></div><div class="campo-recebimento"><label for="dataEntrega">Data da entrega</label><input id="dataEntrega" type="date" value="'+escapar(recebimento.data_entrega||'')+'"></div><small class="ajuda-recebimento">Confirme o recebimento com base no documento de entrega assinado.</small></div>':'')+
+    '<label class="campo-senha">Senha para confirmar a alteração<input id="senhaStatus" type="password" autocomplete="current-password" placeholder="Digite sua senha"></label>'+
+    '<div id="erroStatus" class="erro-modal" hidden></div>'+
+    '<div class="modal-acoes"><button type="button" class="btn btn-limpar" data-modal-fechar>Cancelar</button><button type="button" class="btn btn-pesquisar" id="confirmarStatus" disabled>Confirmar alteração</button></div>'+
+  '</div>';
  modalStatus.style.display='flex';
  modalStatus.setAttribute('aria-hidden','false');
- let novoStatus='';
+ let novoStatus=atual;
  const botoes=modalStatus.querySelectorAll('[data-status-opcao]');
  const senhaInput=modalStatus.querySelector('#senhaStatus');
  const confirmar=modalStatus.querySelector('#confirmarStatus');
+ const camposRecebimento=modalStatus.querySelector('#camposRecebimento');
+ const recebidoPorInput=modalStatus.querySelector('#recebidoPor');
+ const dataEntregaInput=modalStatus.querySelector('#dataEntrega');
+ function atualizarConfirmacao(){
+   const recebimentoValido=!entrega||novoStatus!=='Concluído'||(recebidoPorInput?.value.trim()&&dataEntregaInput?.value);
+   confirmar.disabled=!novoStatus||!senhaInput.value||!recebimentoValido;
+ }
  botoes.forEach(b=>b.addEventListener('click',()=>{
    novoStatus=b.dataset.statusOpcao;
    botoes.forEach(x=>x.classList.remove('selecionado'));
    b.classList.add('selecionado');
-   confirmar.disabled=!novoStatus||!senhaInput.value;
+   if(camposRecebimento)camposRecebimento.hidden=novoStatus!=='Concluído';
+   atualizarConfirmacao();
  }));
- senhaInput.addEventListener('input',()=>{confirmar.disabled=!novoStatus||!senhaInput.value;});
- confirmar.addEventListener('click',()=>confirmarAlteracaoStatus(id,campo,novoStatus,senhaInput.value));
+ senhaInput.addEventListener('input',atualizarConfirmacao);
+ recebidoPorInput?.addEventListener('input',atualizarConfirmacao);
+ dataEntregaInput?.addEventListener('input',atualizarConfirmacao);
+ atualizarConfirmacao();
  senhaInput.focus();
 }
 
@@ -65,18 +74,23 @@ async function confirmarAlteracaoStatus(id,campo,novoStatus,senha){
    if(userError||!user)throw new Error('Usuário não autenticado.');
    const login=await db.auth.signInWithPassword({email:user.email,password:senha});
    if(login.error)throw new Error('Senha inválida.');
-
    const alteracoes={[campo]:novoStatus};
    if(campo==='status_entrega'&&novoStatus==='Cancelado')alteracoes.status_financeiro='Cancelado';
    if(campo==='status_financeiro'&&novoStatus==='Cancelado')alteracoes.status_entrega='Cancelado';
-
+   if(campo==='status_entrega'&&novoStatus==='Concluído'){
+     const recebidoPor=modalStatus.querySelector('#recebidoPor')?.value.trim()||'';
+     const dataEntrega=modalStatus.querySelector('#dataEntrega')?.value||'';
+     if(!recebidoPor||!dataEntrega)throw new Error('Informe quem recebeu e a data da entrega.');
+     alteracoes.recebido_por=recebidoPor;
+     alteracoes.data_entrega=dataEntrega;
+   }
    const {error:updateError}=await db.from('pedidos').update(alteracoes).eq('id',id);
    if(updateError)throw updateError;
    fecharModal();
    await pesquisarPedidos();
  }catch(e){
    console.error('Erro ao alterar status:',e);
-   erro.textContent=e.message==='Senha inválida.'?'Senha inválida.':`Não foi possível alterar o status: ${e.message}`;
+   erro.textContent=e.message==='Senha inválida.'?'Senha inválida.':'Não foi possível alterar o status: '+e.message;
    erro.hidden=false;
    confirmar.disabled=false;
  }
@@ -104,7 +118,7 @@ async function carregarDetalhes(id,tr){
  <div class="detalhes-topo"><div><span class="modal-kicker">DETALHES</span><h3>Pedido #${escapar(data.numero_pedido)}</h3></div><div class="detalhes-total">${formatarBRL(data.valor_total)}</div></div>
  <div class="detalhes-grid">
   <section class="detalhe-card"><h4>Cliente</h4><p><strong>${escapar(data.clientes?.nome)}</strong></p><p>CPF/CNPJ: ${escapar(data.clientes?.cpf_cnpj)}</p><p>Telefone: ${escapar(data.clientes?.telefone)}</p><p>E-mail: ${escapar(data.clientes?.email)}</p></section>
-  <section class="detalhe-card"><h4>Entrega</h4><p>${escapar(data.endereco)}</p><p>Referência: ${escapar(data.referencia)}</p><p>Previsão: ${escapar(data.previsao_entrega)}</p><p>Status: <span class="${classeStatus(data.status_entrega,'entrega')}">${escapar(data.status_entrega)}</span></p></section>
+  <section class="detalhe-card"><h4>Entrega</h4><p>${escapar(data.endereco)}</p><p>Referência: ${escapar(data.referencia)}</p><p>Previsão: ${escapar(data.previsao_entrega)}</p><p>Status: <span class="${classeStatus(data.status_entrega,'entrega')}">${escapar(data.status_entrega)}</span></p>${data.status_entrega==='Concluído'?`<div class="recebimento-detalhes"><p><strong>Recebido por:</strong> ${escapar(data.recebido_por||'Não informado')}</p><p><strong>Data da entrega:</strong> ${escapar(data.data_entrega||'Não informada')}</p><button type="button" class="btn btn-editar-recebimento" data-editar-recebimento="${data.id}">Editar recebimento</button></div>`:''}</section>
   <section class="detalhe-card"><h4>Financeiro</h4><p>Forma de pagamento: ${escapar(data.forma_pagamento)}${data.forma_pagamento==='Pix'?' (4% à vista)':''}</p><p>Frete: ${formatarBRL(data.frete)}</p><p>Desconto: ${formatarBRL(data.desconto)}</p><p>Total: <strong>${formatarBRL(data.valor_total)}</strong></p><p>Status: <span class="${classeStatus(data.status_financeiro,'financeiro')}">${escapar(data.status_financeiro)}</span></p></section>
   <section class="detalhe-card detalhe-produtos"><h4>Produtos</h4>${itens.length?itens.map(i=>`<div class="produto-linha"><span>${escapar(i.produto)}</span><span>Qtd. ${escapar(i.quantidade)} · ${formatarBRL(i.valor_unitario)}</span></div>`).join(''):'<p>Nenhum item encontrado.</p>'}</section>
  </div>
@@ -171,6 +185,9 @@ tabelaPedidos.addEventListener('click',e=>{
    const coluna=btn.dataset.statusCampo==='status_entrega'?4:5;
    const atual=linha?.cells[coluna]?.querySelector('.status-badge')?.textContent.trim()||'';
    mostrarModalStatus(id,btn.dataset.statusCampo,atual);
+ }
+ if(btn.dataset.editarRecebimento){
+   mostrarModalStatus(btn.dataset.editarRecebimento,'status_entrega','Concluído');
  }
  if(btn.dataset.detalhes)abrirDetalhesPedido(btn.dataset.detalhes);
 });
