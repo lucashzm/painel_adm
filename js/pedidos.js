@@ -55,6 +55,7 @@ async function mostrarModalStatus(id,campo,atual){
  recebidoPorInput?.addEventListener('input',atualizarConfirmacao);
  dataEntregaInput?.addEventListener('input',atualizarConfirmacao);
  atualizarConfirmacao();
+ confirmar.addEventListener('click',()=>confirmarAlteracaoStatus(id,campo,novoStatus,senhaInput.value));
  senhaInput.focus();
 }
 
