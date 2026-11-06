@@ -83,7 +83,7 @@ td{color:#3c484d}
  .menu nav{display:flex;justify-content:flex-end;gap:4px;min-width:0}
  .menu a{margin:0;padding:9px 10px;font-size:11px;text-align:center;white-space:nowrap}
  .menu a.menu-ativo{box-shadow:inset 0 -2px #dba47f}
- .menu-usuario{display:none}
+ .menu-usuario{display:flex;grid-column:1/-1;align-items:center;justify-content:space-between;gap:12px;margin:0;padding:7px 6px 0;border-top:1px solid rgba(255,255,255,.12)} .menu-usuario span{display:block;min-width:0;max-width:70%;margin:0;font-size:10px} .menu-sair{width:auto;padding:6px 12px;font-size:11px}
  main{width:100%;padding:22px 14px 34px}
  main>header{margin-bottom:20px}
  .dashboard-filtro,.clientes-toolbar{padding:17px}
