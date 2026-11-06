@@ -319,7 +319,8 @@
         const duration = (Date.now()-state.recordingStarted)/1000;
         const blob = new Blob(state.audioChunks,{type:state.recorder.mimeType || 'audio/webm'});
         const extension = fileExtension({type:blob.type,name:'gravacao.webm'});
-        const file = new File([blob],'gravacao.'+extension,{type:blob.type});
+        const normalizedMime = (blob.type || 'audio/webm').split(';')[0];
+        const file = new File([blob],'gravacao.'+extension,{type:normalizedMime});
         state.recorderStream?.getTracks().forEach(track => track.stop());
         state.recorderStream = null; state.recorder = null;
         $('estadoGravacao').hidden = true; $('btnAudio').classList.remove('gravando');
