@@ -15,28 +15,53 @@
 <div class="menu-usuario"><span id="usuarioLogado"></span><button id="logoutBtn" class="menu-sair">Sair da conta</button></div>
 </aside>
 <main class="conversas-main">
-<header><div><span class="dashboard-kicker">RELACIONAMENTO COM O CLIENTE</span><h1>Conversas</h1><p>Centralize aqui os atendimentos iniciados pelos clientes no catálogo.</p></div><span class="conversas-status-reserva">Central preparada</span></header>
+<header>
+<div><span class="dashboard-kicker">RELACIONAMENTO COM O CLIENTE</span><h1>Conversas</h1><p>Atenda mensagens, fotos e áudios em um só lugar.</p></div>
+<span class="conversas-status-online" id="conexaoStatus">Conectando...</span>
+</header>
 <section class="conversas-toolbar">
-<div class="conversas-toolbar-titulo"><div><span class="dashboard-kicker">ATENDIMENTO</span><h2>Caixa de entrada</h2></div><span class="conversas-contador">0 conversas</span></div>
+<div class="conversas-toolbar-titulo"><div><span class="dashboard-kicker">ATENDIMENTO</span><h2>Caixa de entrada</h2></div><span class="conversas-contador" id="contadorConversas">0 conversas</span></div>
 <div class="conversas-filtros">
-<label class="conversas-busca"><span class="sr-only">Buscar conversa</span><input type="search" placeholder="Buscar por cliente ou mensagem" disabled></label>
-<select aria-label="Filtrar conversas" disabled><option>Todas as conversas</option><option>Aguardando atendimento</option><option>Em atendimento</option><option>Encerradas</option></select>
+<label class="conversas-busca"><span class="sr-only">Buscar conversa</span><input id="buscaConversas" type="search" placeholder="Buscar por nome ou telefone"></label>
+<select id="filtroConversas" aria-label="Filtrar conversas"><option value="todas">Todas as conversas</option><option value="aguardando">Aguardando atendimento</option><option value="em_atendimento">Em atendimento</option><option value="inativa">Inativas</option><option value="encerrada">Encerradas</option></select>
 </div>
 </section>
-<section class="conversas-workspace" aria-label="Área de atendimento">
+<section class="conversas-workspace" id="workspaceConversas" aria-label="Área de atendimento">
 <aside class="conversas-lista">
-<div class="conversas-lista-topo"><strong>Atendimentos</strong><span>0</span></div>
-<div class="conversas-lista-vazia"><div class="conversas-icone">•••</div><strong>Nenhuma conversa por enquanto</strong><p>Quando um cliente iniciar um atendimento pelo catálogo, a conversa aparecerá aqui.</p></div>
+<div class="conversas-lista-topo"><strong>Atendimentos</strong><span id="totalLista">0</span></div>
+<div class="conversas-lista-itens" id="listaConversas"><div class="conversas-lista-vazia"><strong>Nenhuma conversa por enquanto</strong><p>Os atendimentos aparecerão aqui quando o Catálogo estiver integrado.</p></div></div>
 </aside>
 <section class="conversas-chat">
-<div class="conversas-chat-topo"><div class="conversas-avatar">BM</div><div><strong>Atendimento BM Móveis</strong><span>Conectado ao catálogo futuramente</span></div></div>
-<div class="conversas-chat-vazio"><div class="conversas-chat-ilustracao"><span></span><span></span><span></span></div><h2>Seu próximo atendimento começa aqui</h2><p>Selecione uma conversa na lista para visualizar as mensagens e responder ao cliente.</p><small>Esta área é apenas estrutural. Ainda não recebe nem envia mensagens.</small></div>
-<div class="conversas-compositor"><input type="text" placeholder="A resposta ficará disponível quando o chat for integrado..." disabled><button disabled aria-label="Enviar mensagem">Enviar</button></div>
+<div class="conversas-chat-topo">
+<button class="conversas-voltar" id="btnVoltarLista" type="button" aria-label="Voltar para a lista">‹</button>
+<div class="conversas-avatar" id="chatAvatar">BM</div>
+<div class="conversas-chat-identidade"><strong id="chatNome">Atendimento BM Móveis</strong><span id="chatTelefone">Selecione uma conversa</span></div>
+<div class="conversas-chat-acoes"><span class="conversas-status-chat" id="chatStatus">Aguardando seleção</span><button id="btnAssumir" class="btn btn-pesquisar" type="button" disabled>Assumir atendimento</button><button id="btnEncerrar" class="btn btn-limpar" type="button" disabled>Encerrar</button></div>
+</div>
+<div class="conversas-chat-vazio" id="chatVazio"><div class="conversas-chat-simbolo">BM</div><h2>Seu próximo atendimento começa aqui</h2><p>Selecione uma conversa na lista para visualizar as mensagens e responder ao cliente.</p></div>
+<div class="conversas-mensagens" id="mensagensChat" aria-live="polite" hidden></div>
+<div class="conversas-aviso" id="avisoChat" role="status" hidden></div>
+<div class="conversas-compositor" id="compositorChat">
+<div class="conversas-preview" id="midiaPreview" hidden></div>
+<div class="conversas-compositor-linha">
+<div class="conversas-anexos">
+<button class="conversas-icone-btn" id="btnCamera" type="button" title="Tirar foto" aria-label="Tirar foto" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l1.5-2h7L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+<button class="conversas-icone-btn" id="btnGaleria" type="button" title="Enviar foto" aria-label="Enviar foto" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m4 17 5-5 3 3 3-4 5 6"/></svg></button>
+<button class="conversas-icone-btn" id="btnAudio" type="button" title="Gravar áudio" aria-label="Gravar áudio" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2.5" width="6" height="12" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3m-4 0h8"/></svg></button>
+</div>
+<input id="inputMensagem" type="text" placeholder="Digite uma mensagem..." autocomplete="off" disabled>
+<button id="btnEnviar" class="conversas-enviar" type="button" aria-label="Enviar mensagem" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-7.5 18-3.8-7.7L2 9.5 21 3Z"/><path d="M9.7 13.3 21 3"/></svg></button>
+</div>
+<div class="conversas-gravacao" id="estadoGravacao" hidden></div>
+<input id="arquivoCamera" type="file" accept="image/*" capture="environment" hidden>
+<input id="arquivoGaleria" type="file" accept="image/*" hidden>
+</div>
 </section>
 </section>
-<section class="conversas-nota"><strong>Próxima etapa</strong><p>Integrar o botão de chat do catálogo a esta central, conectando o envio, o recebimento das mensagens e os estados de atendimento. O catálogo não foi alterado.</p></section>
+<section class="conversas-nota"><strong>Central de atendimento</strong><p>Mensagens e mídias ficam protegidas no Supabase. O recebimento de clientes será ativado quando o Catálogo for integrado; esta etapa não altera o Catálogo.</p></section>
 </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/conversas.js"></script>
 </body></html>
