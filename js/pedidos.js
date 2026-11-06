@@ -2,6 +2,9 @@ const tabelaPedidos=document.getElementById('listaPedidos');
 const botaoPesquisar=document.getElementById('pesquisarPedidos');
 const botaoLimpar=document.getElementById('limparFiltros');
 const modalStatus=document.getElementById('modalStatus');
+const PEDIDOS_POR_PAGINA=20;
+let paginaPedidosAtual=0;
+let totalPedidosFiltrados=0;
 
 const STATUS_ENTREGA=['Pendente','Reservado','Aguardando recolhimento','Em trânsito','Concluído','Cancelado','Devolvido'];
 const STATUS_FINANCEIRO=['Pendente','Pagamento na entrega','Pago','Cancelado','Devolvido'];
@@ -110,20 +113,25 @@ function abrirDetalhesPedido(id){
 }
 
 async function carregarDetalhes(id,tr){
- const {data,error}=await db.from('pedidos').select('*,clientes(*),pedido_itens(*)').eq('id',id).single();
+ const [{data,error},{data:historico,error:erroHistorico}]=await Promise.all([
+  db.from('pedidos').select('*,clientes(*),pedido_itens(*)').eq('id',id).single(),
+  db.from('pedido_status_historico').select('status_entrega,status_financeiro,created_at,alterado_por,users(nome)').eq('pedido_id',id).order('created_at',{ascending:true})
+ ]);
  const box=tr.querySelector('.detalhes-pedido');
  if(error){box.innerHTML='<div class="erro-modal">Não foi possível carregar os detalhes do pedido.</div>';console.error(error);return;}
  const itens=data.pedido_itens||[];
+ const historicoHtml=erroHistorico?'<p>Histórico indisponível.</p>':(historico||[]).map(h=>'<div class="historico-status-linha"><span>'+new Date(h.created_at).toLocaleString('pt-BR')+'</span><strong>'+escapar(h.status_entrega||'—')+'</strong><span>Financeiro: '+escapar(h.status_financeiro||'—')+'</span><small>'+escapar(h.users?.nome||'Sistema')+'</small></div>').join('')||'<p>Nenhuma alteração registrada.</p>';
  box.classList.remove('carregando');
  box.innerHTML=`
  <div class="detalhes-topo"><div><span class="modal-kicker">DETALHES</span><h3>Pedido #${escapar(data.numero_pedido)}</h3></div><div class="detalhes-total">${formatarBRL(data.valor_total)}</div></div>
  <div class="detalhes-grid">
   <section class="detalhe-card"><h4>Cliente</h4><p><strong>${escapar(data.clientes?.nome)}</strong></p><p>CPF/CNPJ: ${escapar(data.clientes?.cpf_cnpj)}</p><p>Telefone: ${escapar(data.clientes?.telefone)}</p><p>E-mail: ${escapar(data.clientes?.email)}</p></section>
   <section class="detalhe-card"><h4>Entrega</h4><p>${escapar(data.endereco)}</p><p>Referência: ${escapar(data.referencia)}</p><p>Previsão: ${escapar(data.previsao_entrega)}</p><p>Status: <span class="${classeStatus(data.status_entrega,'entrega')}">${escapar(data.status_entrega)}</span></p>${data.status_entrega==='Concluído'?`<div class="recebimento-detalhes"><p><strong>Recebido por:</strong> ${escapar(data.recebido_por||'Não informado')}</p><p><strong>Data da entrega:</strong> ${escapar(data.data_entrega||'Não informada')}</p><button type="button" class="btn btn-editar-recebimento" data-editar-recebimento="${data.id}">Editar recebimento</button></div>`:''}</section>
-  <section class="detalhe-card"><h4>Financeiro</h4><p>Forma de pagamento: ${escapar(data.forma_pagamento)}${data.forma_pagamento==='Pix'?' (4% à vista)':''}</p><p>Frete: ${formatarBRL(data.frete)}</p><p>Desconto: ${formatarBRL(data.desconto)}</p><p>Total: <strong>${formatarBRL(data.valor_total)}</strong></p><p>Status: <span class="${classeStatus(data.status_financeiro,'financeiro')}">${escapar(data.status_financeiro)}</span></p></section>
+  <section class="detalhe-card"><h4>Financeiro</h4><p>Forma de pagamento: ${escapar(data.forma_pagamento)}${data.forma_pagamento==='Pix'?' (4% à vista)':''}</p>${data.condicao_cartao?`<p>Condição: ${escapar(data.condicao_cartao)}</p>`:''}${Number(data.taxa_parcelamento||0)>0?`<p>Taxa de parcelamento: ${formatarBRL(data.taxa_parcelamento)}</p>`:''}<p>Frete: ${formatarBRL(data.frete)}</p><p>Desconto: ${formatarBRL(data.desconto)}</p><p>Total: <strong>${formatarBRL(data.valor_total)}</strong></p><p>Status: <span class="${classeStatus(data.status_financeiro,'financeiro')}">${escapar(data.status_financeiro)}</span></p></section>
   <section class="detalhe-card detalhe-produtos"><h4>Produtos</h4>${itens.length?itens.map(i=>`<div class="produto-linha"><span>${escapar(i.produto)}</span><span>Qtd. ${escapar(i.quantidade)} · ${formatarBRL(i.valor_unitario)}</span></div>`).join(''):'<p>Nenhum item encontrado.</p>'}</section>
  </div>
  <section class="detalhe-card detalhe-observacoes"><h4>Observações</h4><p>${escapar(data.observacoes)||'Nenhuma observação.'}</p></section>
+ <section class="detalhe-card detalhe-historico"><h4>Histórico de status</h4>${historicoHtml}</section>
  <div class="detalhe-documentos"><strong>Documentos</strong><div class="detalhe-documentos-acoes"><button type="button" class="btn btn-pesquisar" data-documento="pedido-venda" data-id="${data.id}">Gerar Pedido de Venda</button><button type="button" class="btn btn-limpar" data-documento="entrega" data-id="${data.id}">Gerar Documento de Entrega</button></div></div>`;
 }
 
@@ -145,7 +153,8 @@ async function gerarDocumentoAPartirDoPedido(btn){
  }
 }
 
-async function pesquisarPedidos(){
+async function pesquisarPedidos(pagina=0){
+ paginaPedidosAtual=Math.max(0,pagina);
  const numero=document.getElementById('buscaPedido')?.value.trim()||'';
  const cliente=document.getElementById('buscaCliente')?.value.trim()||'';
  const vendedor=document.getElementById('filtroVendedor')?.value||'';
@@ -153,7 +162,7 @@ async function pesquisarPedidos(){
  const financeiro=document.getElementById('filtroFinanceiro')?.value||'';
  const inicio=document.getElementById('dataInicial')?.value||'';
  const fim=document.getElementById('dataFinal')?.value||'';
- let q=db.from('pedidos').select('id,numero_pedido,valor_total,status_entrega,status_financeiro,created_at,cliente_id,user_id,clientes(nome,cpf_cnpj),users(nome)');
+ let q=db.from('pedidos').select('id,numero_pedido,valor_total,status_entrega,status_financeiro,created_at,cliente_id,user_id,clientes(nome,cpf_cnpj),users(nome)',{count:'exact'});
  if(numero)q=q.eq('numero_pedido',numero);
  if(cliente)q=q.or(`nome.ilike.%${cliente}%,cpf_cnpj.ilike.%${cliente}%`,{referencedTable:'clientes'});
  if(vendedor)q=q.eq('user_id',vendedor);
@@ -161,7 +170,9 @@ async function pesquisarPedidos(){
  if(financeiro)q=q.eq('status_financeiro',financeiro);
  if(inicio)q=q.gte('created_at',inicio+'T00:00:00');
  if(fim)q=q.lte('created_at',fim+'T23:59:59');
- const {data,error}=await q.order('created_at',{ascending:false});
+ const offset=paginaPedidosAtual*PEDIDOS_POR_PAGINA;
+ const {data,error,count}=await q.order('created_at',{ascending:false}).range(offset,offset+PEDIDOS_POR_PAGINA-1);
+ totalPedidosFiltrados=count||0;
  if(error){console.error('Erro na pesquisa:',error);tabelaPedidos.innerHTML='<tr><td colspan="8" class="erro-tabela">Não foi possível consultar os pedidos.</td></tr>';return;}
  tabelaPedidos.innerHTML='';
  (data||[]).forEach(p=>{
@@ -169,14 +180,23 @@ async function pesquisarPedidos(){
    tr.innerHTML=`<td>${escapar(p.numero_pedido)}</td><td>${escapar(p.clientes?.nome)}</td><td>${escapar(p.users?.nome)}</td><td>${formatarBRL(p.valor_total)}</td><td><span class="${classeStatus(p.status_entrega,'entrega')}">${escapar(p.status_entrega)}</span></td><td><span class="${classeStatus(p.status_financeiro,'financeiro')}">${escapar(p.status_financeiro)}</span></td><td>${new Date(p.created_at).toLocaleDateString('pt-BR')}</td><td class="celula-acoes"><button type="button" class="acao acao-status-entrega" data-status-campo="status_entrega" data-id="${p.id}">Entrega</button><button type="button" class="acao acao-status-financeiro" data-status-campo="status_financeiro" data-id="${p.id}">Financeiro</button><button type="button" class="acao acao-detalhes" data-detalhes="${p.id}" aria-label="Mostrar detalhes">+</button></td>`;
    tabelaPedidos.appendChild(tr);
  });
+ const inicioPagina=totalPedidosFiltrados?offset+1:0;
+ const fimPagina=Math.min(offset+(data||[]).length,totalPedidosFiltrados);
+ const linhaPaginacao=document.createElement('tr');
+ linhaPaginacao.className='linha-paginacao';
+ linhaPaginacao.innerHTML='<td colspan="8"><div class="paginacao-pedidos"><span>Mostrando '+inicioPagina+'–'+fimPagina+' de '+totalPedidosFiltrados+' pedidos</span><div><button type="button" id="paginaAnteriorPedidos" '+(paginaPedidosAtual===0?'disabled':'')+'>Anterior</button><button type="button" id="paginaProximaPedidos" '+((paginaPedidosAtual+1)*PEDIDOS_POR_PAGINA>=totalPedidosFiltrados?'disabled':'')+'>Próxima</button></div></div></td>';
+ tabelaPedidos.appendChild(linhaPaginacao);
 }
 
 function limparFiltros(){
  document.querySelectorAll('.filtros input,.filtros select').forEach(x=>x.value='');
+ paginaPedidosAtual=0;
  tabelaPedidos.innerHTML='';
 }
 
 tabelaPedidos.addEventListener('click',e=>{
+ if(e.target.id==='paginaAnteriorPedidos'){pesquisarPedidos(paginaPedidosAtual-1);return;}
+ if(e.target.id==='paginaProximaPedidos'){pesquisarPedidos(paginaPedidosAtual+1);return;}
  const btn=e.target.closest('button');
  if(!btn)return;
  const id=btn.dataset.id||btn.dataset.detalhes;
@@ -195,6 +215,6 @@ tabelaPedidos.addEventListener('click',e=>{
 
 modalStatus.addEventListener('click',e=>{if(e.target===modalStatus||e.target.closest('[data-modal-fechar]'))fecharModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modalStatus.getAttribute('aria-hidden')==='false')fecharModal();});
-botaoPesquisar?.addEventListener('click',pesquisarPedidos);
+botaoPesquisar?.addEventListener('click',()=>pesquisarPedidos(0));
 botaoLimpar?.addEventListener('click',limparFiltros);
 window.pesquisarPedidos=pesquisarPedidos;

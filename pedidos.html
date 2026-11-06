@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="layout">
-<aside class="menu"><h2>BM Moveis</h2><nav><a href="index.html">Dashboard</a><a href="pedidos.html">Pedidos</a><a href="clientes.html">Clientes</a></nav><div class="menu-usuario"><span id="usuarioLogado"></span><button id="logoutBtn" class="menu-sair">Sair</button></div></aside>
+<aside class="menu"><h2>BM Moveis</h2><nav><a href="index.html">Dashboard</a><a href="pedidos.html" class="menu-ativo">Pedidos</a><a href="clientes.html">Clientes</a></nav><div class="menu-usuario"><span id="usuarioLogado"></span><button id="logoutBtn" class="menu-sair">Sair</button></div></aside>
 <main>
 <h1>Pedidos</h1>
 <section class="filtros">
@@ -28,10 +28,12 @@
 <input id="dataFinal" type="date" aria-label="Data final">
 <div class="acoes-filtro"><button id="pesquisarPedidos" class="btn btn-pesquisar">Pesquisar</button><button id="limparFiltros" class="btn btn-limpar">Limpar</button></div>
 </section>
+<div class="table-wrap">
 <table>
 <thead><tr><th>Pedido</th><th>Cliente</th><th>Vendedor</th><th>Valor</th><th>Entrega</th><th>Financeiro</th><th>Data</th><th>Ações</th></tr></thead>
 <tbody id="listaPedidos"></tbody>
 </table>
+</div>
 </main>
 </div>
 <div id="modalStatus" class="modal-overlay" aria-hidden="true"></div>
