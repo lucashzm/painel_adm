@@ -2,6 +2,9 @@ const tabelaPedidos=document.getElementById('listaPedidos');
 const botaoPesquisar=document.getElementById('pesquisarPedidos');
 const botaoLimpar=document.getElementById('limparFiltros');
 const modalStatus=document.getElementById('modalStatus');
+const PEDIDOS_POR_PAGINA=20;
+let paginaPedidosAtual=0;
+let totalPedidosFiltrados=0;
 
 const STATUS_ENTREGA=['Pendente','Reservado','Aguardando recolhimento','Em trânsito','Concluído','Cancelado','Devolvido'];
 const STATUS_FINANCEIRO=['Pendente','Pagamento na entrega','Pago','Cancelado','Devolvido'];
@@ -145,7 +148,8 @@ async function gerarDocumentoAPartirDoPedido(btn){
  }
 }
 
-async function pesquisarPedidos(){
+async function pesquisarPedidos(pagina=0){
+ paginaPedidosAtual=Math.max(0,pagina);
  const numero=document.getElementById('buscaPedido')?.value.trim()||'';
  const cliente=document.getElementById('buscaCliente')?.value.trim()||'';
  const vendedor=document.getElementById('filtroVendedor')?.value||'';
@@ -161,7 +165,9 @@ async function pesquisarPedidos(){
  if(financeiro)q=q.eq('status_financeiro',financeiro);
  if(inicio)q=q.gte('created_at',inicio+'T00:00:00');
  if(fim)q=q.lte('created_at',fim+'T23:59:59');
- const {data,error}=await q.order('created_at',{ascending:false});
+ const offset=paginaPedidosAtual*PEDIDOS_POR_PAGINA;
+ const {data,error,count}=await q.order('created_at',{ascending:false}).range(offset,offset+PEDIDOS_POR_PAGINA-1);
+ totalPedidosFiltrados=count||0;
  if(error){console.error('Erro na pesquisa:',error);tabelaPedidos.innerHTML='<tr><td colspan="8" class="erro-tabela">Não foi possível consultar os pedidos.</td></tr>';return;}
  tabelaPedidos.innerHTML='';
  (data||[]).forEach(p=>{
@@ -169,14 +175,23 @@ async function pesquisarPedidos(){
    tr.innerHTML=`<td>${escapar(p.numero_pedido)}</td><td>${escapar(p.clientes?.nome)}</td><td>${escapar(p.users?.nome)}</td><td>${formatarBRL(p.valor_total)}</td><td><span class="${classeStatus(p.status_entrega,'entrega')}">${escapar(p.status_entrega)}</span></td><td><span class="${classeStatus(p.status_financeiro,'financeiro')}">${escapar(p.status_financeiro)}</span></td><td>${new Date(p.created_at).toLocaleDateString('pt-BR')}</td><td class="celula-acoes"><button type="button" class="acao acao-status-entrega" data-status-campo="status_entrega" data-id="${p.id}">Entrega</button><button type="button" class="acao acao-status-financeiro" data-status-campo="status_financeiro" data-id="${p.id}">Financeiro</button><button type="button" class="acao acao-detalhes" data-detalhes="${p.id}" aria-label="Mostrar detalhes">+</button></td>`;
    tabelaPedidos.appendChild(tr);
  });
+ const inicio=totalPedidosFiltrados?offset+1:0;
+ const fim=Math.min(offset+(data||[]).length,totalPedidosFiltrados);
+ const linhaPaginacao=document.createElement('tr');
+ linhaPaginacao.className='linha-paginacao';
+ linhaPaginacao.innerHTML='<td colspan="8"><div class="paginacao-pedidos"><span>Mostrando '+inicio+'–'+fim+' de '+totalPedidosFiltrados+' pedidos</span><div><button type="button" id="paginaAnteriorPedidos" '+(paginaPedidosAtual===0?'disabled':'')+'>Anterior</button><button type="button" id="paginaProximaPedidos" '+((paginaPedidosAtual+1)*PEDIDOS_POR_PAGINA>=totalPedidosFiltrados?'disabled':'')+'>Próxima</button></div></div></td>';
+ tabelaPedidos.appendChild(linhaPaginacao);
 }
 
 function limparFiltros(){
  document.querySelectorAll('.filtros input,.filtros select').forEach(x=>x.value='');
+ paginaPedidosAtual=0;
  tabelaPedidos.innerHTML='';
 }
 
 tabelaPedidos.addEventListener('click',e=>{
+ if(e.target.id==='paginaAnteriorPedidos'){pesquisarPedidos(paginaPedidosAtual-1);return;}
+ if(e.target.id==='paginaProximaPedidos'){pesquisarPedidos(paginaPedidosAtual+1);return;}
  const btn=e.target.closest('button');
  if(!btn)return;
  const id=btn.dataset.id||btn.dataset.detalhes;
@@ -195,6 +210,6 @@ tabelaPedidos.addEventListener('click',e=>{
 
 modalStatus.addEventListener('click',e=>{if(e.target===modalStatus||e.target.closest('[data-modal-fechar]'))fecharModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modalStatus.getAttribute('aria-hidden')==='false')fecharModal();});
-botaoPesquisar?.addEventListener('click',pesquisarPedidos);
+botaoPesquisar?.addEventListener('click',()=>pesquisarPedidos(0));
 botaoLimpar?.addEventListener('click',limparFiltros);
 window.pesquisarPedidos=pesquisarPedidos;
