@@ -180,11 +180,11 @@ async function pesquisarPedidos(pagina=0){
    tr.innerHTML=`<td>${escapar(p.numero_pedido)}</td><td>${escapar(p.clientes?.nome)}</td><td>${escapar(p.users?.nome)}</td><td>${formatarBRL(p.valor_total)}</td><td><span class="${classeStatus(p.status_entrega,'entrega')}">${escapar(p.status_entrega)}</span></td><td><span class="${classeStatus(p.status_financeiro,'financeiro')}">${escapar(p.status_financeiro)}</span></td><td>${new Date(p.created_at).toLocaleDateString('pt-BR')}</td><td class="celula-acoes"><button type="button" class="acao acao-status-entrega" data-status-campo="status_entrega" data-id="${p.id}">Entrega</button><button type="button" class="acao acao-status-financeiro" data-status-campo="status_financeiro" data-id="${p.id}">Financeiro</button><button type="button" class="acao acao-detalhes" data-detalhes="${p.id}" aria-label="Mostrar detalhes">+</button></td>`;
    tabelaPedidos.appendChild(tr);
  });
- const inicio=totalPedidosFiltrados?offset+1:0;
- const fim=Math.min(offset+(data||[]).length,totalPedidosFiltrados);
+ const inicioPagina=totalPedidosFiltrados?offset+1:0;
+ const fimPagina=Math.min(offset+(data||[]).length,totalPedidosFiltrados);
  const linhaPaginacao=document.createElement('tr');
  linhaPaginacao.className='linha-paginacao';
- linhaPaginacao.innerHTML='<td colspan="8"><div class="paginacao-pedidos"><span>Mostrando '+inicio+'–'+fim+' de '+totalPedidosFiltrados+' pedidos</span><div><button type="button" id="paginaAnteriorPedidos" '+(paginaPedidosAtual===0?'disabled':'')+'>Anterior</button><button type="button" id="paginaProximaPedidos" '+((paginaPedidosAtual+1)*PEDIDOS_POR_PAGINA>=totalPedidosFiltrados?'disabled':'')+'>Próxima</button></div></div></td>';
+ linhaPaginacao.innerHTML='<td colspan="8"><div class="paginacao-pedidos"><span>Mostrando '+inicioPagina+'–'+fimPagina+' de '+totalPedidosFiltrados+' pedidos</span><div><button type="button" id="paginaAnteriorPedidos" '+(paginaPedidosAtual===0?'disabled':'')+'>Anterior</button><button type="button" id="paginaProximaPedidos" '+((paginaPedidosAtual+1)*PEDIDOS_POR_PAGINA>=totalPedidosFiltrados?'disabled':'')+'>Próxima</button></div></div></td>';
  tabelaPedidos.appendChild(linhaPaginacao);
 }
 
