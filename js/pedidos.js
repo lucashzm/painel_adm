@@ -113,20 +113,25 @@ function abrirDetalhesPedido(id){
 }
 
 async function carregarDetalhes(id,tr){
- const {data,error}=await db.from('pedidos').select('*,clientes(*),pedido_itens(*)').eq('id',id).single();
+ const [{data,error},{data:historico,error:erroHistorico}]=await Promise.all([
+  db.from('pedidos').select('*,clientes(*),pedido_itens(*)').eq('id',id).single(),
+  db.from('pedido_status_historico').select('status_entrega,status_financeiro,created_at,alterado_por,users(nome)').eq('pedido_id',id).order('created_at',{ascending:true})
+ ]);
  const box=tr.querySelector('.detalhes-pedido');
  if(error){box.innerHTML='<div class="erro-modal">Não foi possível carregar os detalhes do pedido.</div>';console.error(error);return;}
  const itens=data.pedido_itens||[];
+ const historicoHtml=erroHistorico?'<p>Histórico indisponível.</p>':(historico||[]).map(h=>'<div class="historico-status-linha"><span>'+new Date(h.created_at).toLocaleString('pt-BR')+'</span><strong>'+escapar(h.status_entrega||'—')+'</strong><span>Financeiro: '+escapar(h.status_financeiro||'—')+'</span><small>'+escapar(h.users?.nome||'Sistema')+'</small></div>').join('')||'<p>Nenhuma alteração registrada.</p>';
  box.classList.remove('carregando');
  box.innerHTML=`
  <div class="detalhes-topo"><div><span class="modal-kicker">DETALHES</span><h3>Pedido #${escapar(data.numero_pedido)}</h3></div><div class="detalhes-total">${formatarBRL(data.valor_total)}</div></div>
  <div class="detalhes-grid">
   <section class="detalhe-card"><h4>Cliente</h4><p><strong>${escapar(data.clientes?.nome)}</strong></p><p>CPF/CNPJ: ${escapar(data.clientes?.cpf_cnpj)}</p><p>Telefone: ${escapar(data.clientes?.telefone)}</p><p>E-mail: ${escapar(data.clientes?.email)}</p></section>
   <section class="detalhe-card"><h4>Entrega</h4><p>${escapar(data.endereco)}</p><p>Referência: ${escapar(data.referencia)}</p><p>Previsão: ${escapar(data.previsao_entrega)}</p><p>Status: <span class="${classeStatus(data.status_entrega,'entrega')}">${escapar(data.status_entrega)}</span></p>${data.status_entrega==='Concluído'?`<div class="recebimento-detalhes"><p><strong>Recebido por:</strong> ${escapar(data.recebido_por||'Não informado')}</p><p><strong>Data da entrega:</strong> ${escapar(data.data_entrega||'Não informada')}</p><button type="button" class="btn btn-editar-recebimento" data-editar-recebimento="${data.id}">Editar recebimento</button></div>`:''}</section>
-  <section class="detalhe-card"><h4>Financeiro</h4><p>Forma de pagamento: ${escapar(data.forma_pagamento)}${data.forma_pagamento==='Pix'?' (4% à vista)':''}</p><p>Frete: ${formatarBRL(data.frete)}</p><p>Desconto: ${formatarBRL(data.desconto)}</p><p>Total: <strong>${formatarBRL(data.valor_total)}</strong></p><p>Status: <span class="${classeStatus(data.status_financeiro,'financeiro')}">${escapar(data.status_financeiro)}</span></p></section>
+  <section class="detalhe-card"><h4>Financeiro</h4><p>Forma de pagamento: ${escapar(data.forma_pagamento)}${data.forma_pagamento==='Pix'?' (4% à vista)':''}</p>${data.condicao_cartao?`<p>Condição: ${escapar(data.condicao_cartao)}</p>`:''}${Number(data.taxa_parcelamento||0)>0?`<p>Taxa de parcelamento: ${formatarBRL(data.taxa_parcelamento)}</p>`:''}<p>Frete: ${formatarBRL(data.frete)}</p><p>Desconto: ${formatarBRL(data.desconto)}</p><p>Total: <strong>${formatarBRL(data.valor_total)}</strong></p><p>Status: <span class="${classeStatus(data.status_financeiro,'financeiro')}">${escapar(data.status_financeiro)}</span></p></section>
   <section class="detalhe-card detalhe-produtos"><h4>Produtos</h4>${itens.length?itens.map(i=>`<div class="produto-linha"><span>${escapar(i.produto)}</span><span>Qtd. ${escapar(i.quantidade)} · ${formatarBRL(i.valor_unitario)}</span></div>`).join(''):'<p>Nenhum item encontrado.</p>'}</section>
  </div>
  <section class="detalhe-card detalhe-observacoes"><h4>Observações</h4><p>${escapar(data.observacoes)||'Nenhuma observação.'}</p></section>
+ <section class="detalhe-card detalhe-historico"><h4>Histórico de status</h4>${historicoHtml}</section>
  <div class="detalhe-documentos"><strong>Documentos</strong><div class="detalhe-documentos-acoes"><button type="button" class="btn btn-pesquisar" data-documento="pedido-venda" data-id="${data.id}">Gerar Pedido de Venda</button><button type="button" class="btn btn-limpar" data-documento="entrega" data-id="${data.id}">Gerar Documento de Entrega</button></div></div>`;
 }
 
