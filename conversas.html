@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#102b37"><title>Conversas | BM Móveis</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="layout">
+<aside class="menu">
+<h2>Móveis</h2>
+<nav aria-label="Navegação principal">
+<a href="index.html">Visão geral</a><a href="pedidos.html">Pedidos</a><a href="clientes.html">Clientes</a><a href="conversas.html" class="menu-ativo" aria-current="page">Conversas</a>
+</nav>
+<div class="menu-usuario"><span id="usuarioLogado"></span><button id="logoutBtn" class="menu-sair">Sair da conta</button></div>
+</aside>
+<main class="conversas-main">
+<header><div><span class="dashboard-kicker">RELACIONAMENTO COM O CLIENTE</span><h1>Conversas</h1><p>Centralize aqui os atendimentos iniciados pelos clientes no catálogo.</p></div><span class="conversas-status-reserva">Central preparada</span></header>
+<section class="conversas-toolbar">
+<div class="conversas-toolbar-titulo"><div><span class="dashboard-kicker">ATENDIMENTO</span><h2>Caixa de entrada</h2></div><span class="conversas-contador">0 conversas</span></div>
+<div class="conversas-filtros">
+<label class="conversas-busca"><span class="sr-only">Buscar conversa</span><input type="search" placeholder="Buscar por cliente ou mensagem" disabled></label>
+<select aria-label="Filtrar conversas" disabled><option>Todas as conversas</option><option>Aguardando atendimento</option><option>Em atendimento</option><option>Encerradas</option></select>
+</div>
+</section>
+<section class="conversas-workspace" aria-label="Área de atendimento">
+<aside class="conversas-lista">
+<div class="conversas-lista-topo"><strong>Atendimentos</strong><span>0</span></div>
+<div class="conversas-lista-vazia"><div class="conversas-icone">•••</div><strong>Nenhuma conversa por enquanto</strong><p>Quando um cliente iniciar um atendimento pelo catálogo, a conversa aparecerá aqui.</p></div>
+</aside>
+<section class="conversas-chat">
+<div class="conversas-chat-topo"><div class="conversas-avatar">BM</div><div><strong>Atendimento BM Móveis</strong><span>Conectado ao catálogo futuramente</span></div></div>
+<div class="conversas-chat-vazio"><div class="conversas-chat-ilustracao"><span></span><span></span><span></span></div><h2>Seu próximo atendimento começa aqui</h2><p>Selecione uma conversa na lista para visualizar as mensagens e responder ao cliente.</p><small>Esta área é apenas estrutural. Ainda não recebe nem envia mensagens.</small></div>
+<div class="conversas-compositor"><input type="text" placeholder="A resposta ficará disponível quando o chat for integrado..." disabled><button disabled aria-label="Enviar mensagem">Enviar</button></div>
+</section>
+</section>
+<section class="conversas-nota"><strong>Próxima etapa</strong><p>Integrar o botão de chat do catálogo a esta central, conectando o envio, o recebimento das mensagens e os estados de atendimento. O catálogo não foi alterado.</p></section>
+</main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/auth.js"></script>
+</body></html>
