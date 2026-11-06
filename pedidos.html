@@ -1,46 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pedidos - BM Moveis</title>
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/documentos.css">
-</head>
-<body>
-<div class="layout">
-<aside class="menu"><h2>BM Moveis</h2><nav><a href="index.html">Dashboard</a><a href="pedidos.html" class="menu-ativo">Pedidos</a><a href="clientes.html">Clientes</a></nav><div class="menu-usuario"><span id="usuarioLogado"></span><button id="logoutBtn" class="menu-sair">Sair</button></div></aside>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#102b37"><title>Pedidos | BM Móveis</title><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/documentos.css"></head>
+<body><div class="layout">
+<aside class="menu"><h2>Móveis</h2><nav aria-label="Navegação principal"><a href="index.html">Visão geral</a><a href="pedidos.html" class="menu-ativo">Pedidos</a><a href="clientes.html">Clientes</a></nav><div class="menu-usuario"><span id="usuarioLogado"></span><button id="logoutBtn" class="menu-sair">Sair da conta</button></div></aside>
 <main>
-<h1>Pedidos</h1>
+<header><div><span class="dashboard-kicker">GESTÃO COMERCIAL</span><h1>Pedidos</h1><p>Pesquise vendas, acompanhe etapas e atualize os status.</p></div></header>
 <section class="filtros">
-<input id="buscaPedido" placeholder="Número do pedido">
-<input id="buscaCliente" placeholder="Cliente ou CPF/CNPJ">
+<input id="buscaPedido" placeholder="Número do pedido" aria-label="Número do pedido"><input id="buscaCliente" placeholder="Cliente ou CPF/CNPJ" aria-label="Cliente ou CPF/CNPJ">
 <select id="filtroVendedor"><option value="">Todos vendedores</option></select>
-<select id="filtroEntrega">
-<option value="">Status entrega</option>
-<option>Pendente</option><option>Reservado</option><option>Aguardando recolhimento</option><option>Em trânsito</option><option>Concluído</option><option>Cancelado</option><option>Devolvido</option>
-</select>
-<select id="filtroFinanceiro">
-<option value="">Status financeiro</option>
-<option>Pendente</option><option>Pagamento na entrega</option><option>Pago</option><option>Cancelado</option><option>Devolvido</option>
-</select>
-<input id="dataInicial" type="date" aria-label="Data inicial">
-<input id="dataFinal" type="date" aria-label="Data final">
+<select id="filtroEntrega"><option value="">Status de entrega</option><option>Pendente</option><option>Reservado</option><option>Aguardando recolhimento</option><option>Em trânsito</option><option>Concluído</option><option>Cancelado</option><option>Devolvido</option></select>
+<select id="filtroFinanceiro"><option value="">Status financeiro</option><option>Pendente</option><option>Pagamento na entrega</option><option>Pago</option><option>Cancelado</option><option>Devolvido</option></select>
+<input id="dataInicial" type="date" aria-label="Data inicial"><input id="dataFinal" type="date" aria-label="Data final">
 <div class="acoes-filtro"><button id="pesquisarPedidos" class="btn btn-pesquisar">Pesquisar</button><button id="limparFiltros" class="btn btn-limpar">Limpar</button></div>
 </section>
-<div class="table-wrap">
-<table>
-<thead><tr><th>Pedido</th><th>Cliente</th><th>Vendedor</th><th>Valor</th><th>Entrega</th><th>Financeiro</th><th>Data</th><th>Ações</th></tr></thead>
-<tbody id="listaPedidos"></tbody>
-</table>
-</div>
-</main>
-</div>
-<div id="modalStatus" class="modal-overlay" aria-hidden="true"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/documentos.js"></script>
-<script src="js/pedidos.js"></script>
-</body>
-</html>
+<div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Vendedor</th><th>Valor</th><th>Entrega</th><th>Financeiro</th><th>Data</th><th>Ações</th></tr></thead><tbody id="listaPedidos"></tbody></table></div>
+</main></div><div id="modalStatus" class="modal-overlay" aria-hidden="true"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script><script src="js/auth.js"></script><script src="js/documentos.js"></script><script src="js/pedidos.js"></script>
+</body></html>

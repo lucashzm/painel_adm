@@ -1,61 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clientes - Decoralar</title>
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-<div class="layout">
-<aside class="menu">
-<h2>BM</h2>
-<nav>
-<a href="index.html">Dashboard</a>
-<a href="pedidos.html">Pedidos</a>
-<a href="clientes.html" class="menu-ativo">Clientes</a>
-</nav>
-<div class="menu-usuario">
-<span id="usuarioLogado"></span>
-<button id="logoutBtn" class="menu-sair">Sair</button>
-</div>
-</aside>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#102b37"><title>Clientes | BM Móveis</title><link rel="stylesheet" href="css/style.css"></head>
+<body><div class="layout">
+<aside class="menu"><h2>Móveis</h2><nav aria-label="Navegação principal"><a href="index.html">Visão geral</a><a href="pedidos.html">Pedidos</a><a href="clientes.html" class="menu-ativo">Clientes</a></nav><div class="menu-usuario"><span id="usuarioLogado"></span><button id="logoutBtn" class="menu-sair">Sair da conta</button></div></aside>
 <main>
-<header>
-<h1>Clientes</h1>
-<p>Pesquise os clientes cadastrados pelos dados abaixo.</p>
-</header>
+<header><div><span class="dashboard-kicker">RELACIONAMENTO</span><h1>Clientes</h1><p>Localize cadastros e consulte o histórico de relacionamento.</p></div></header>
 <section class="clientes-filtros">
-<div class="clientes-filtro">
-<label for="filtroNome">Nome</label>
-<input id="filtroNome" placeholder="Nome do cliente">
-</div>
-<div class="clientes-filtro">
-<label for="filtroCpf">CPF/CNPJ</label>
-<input id="filtroCpf" placeholder="CPF ou CNPJ">
-</div>
-<div class="clientes-filtro">
-<label for="filtroTelefone">Telefone</label>
-<input id="filtroTelefone" placeholder="Telefone">
-</div>
-<div class="clientes-filtro">
-<label for="filtroEmail">E-mail</label>
-<input id="filtroEmail" type="email" placeholder="E-mail">
-</div>
-<div class="clientes-filtro">
-<label for="filtroData">Data de cadastro</label>
-<input id="filtroData" type="date">
-</div>
-<div class="clientes-acoes">
-<button id="pesquisarClientes" class="btn btn-pesquisar">Pesquisar</button>
-<button id="limparFiltros" class="btn btn-limpar">Limpar</button>
-</div>
+<div class="clientes-filtro"><label for="filtroNome">Nome</label><input id="filtroNome" placeholder="Nome do cliente"></div>
+<div class="clientes-filtro"><label for="filtroCpf">CPF/CNPJ</label><input id="filtroCpf" placeholder="CPF ou CNPJ"></div>
+<div class="clientes-filtro"><label for="filtroTelefone">Telefone</label><input id="filtroTelefone" placeholder="Telefone"></div>
+<div class="clientes-filtro"><label for="filtroEmail">E-mail</label><input id="filtroEmail" type="email" placeholder="E-mail"></div>
+<div class="clientes-filtro"><label for="filtroData">Data de cadastro</label><input id="filtroData" type="date"></div>
+<div class="clientes-acoes"><button id="pesquisarClientes" class="btn btn-pesquisar">Pesquisar</button><button id="limparFiltros" class="btn btn-limpar">Limpar</button></div>
 </section>
 <section class="clientes-lista" id="listaClientes"><div class="clientes-vazio">Informe um ou mais campos e clique em Pesquisar.</div></section>
-</main>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/clientes.js"></script>
-</body>
-</html>
+</main></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script src="js/auth.js"></script><script src="js/clientes.js"></script>
+</body></html>
