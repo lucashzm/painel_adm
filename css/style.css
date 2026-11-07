@@ -205,3 +205,17 @@ tbody tr:hover>td{background:#fbfdfd}
   .conversas-compositor .conversas-icone-btn{flex-basis:32px;width:32px;height:34px}
   .conversas-compositor .conversas-enviar{flex-basis:34px;width:34px;height:34px}
 }
+
+
+/* Presença do cliente e fila de atendimento */
+.conversa-item-linha{align-items:center}
+.conversa-item-presenca,.cliente-presenca i{
+  display:inline-block;flex:0 0 8px;width:8px;height:8px;border-radius:50%;
+  vertical-align:middle;background:#d94b4b;box-shadow:0 0 0 2px rgba(217,75,75,.12)
+}
+.conversa-item-presenca.online,.cliente-presenca.online i{
+  background:#20a464;box-shadow:0 0 0 2px rgba(32,164,100,.14)
+}
+.cliente-presenca{display:flex!important;align-items:center;gap:7px;margin-top:3px}
+.cliente-presenca[hidden]{display:none!important}
+.cliente-presenca small{font-size:10px;color:#75868c}
