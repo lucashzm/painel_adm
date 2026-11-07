@@ -157,3 +157,65 @@ tbody tr:hover>td{background:#fbfdfd}
 @media(max-width:820px){.conversas-workspace{height:calc(100vh - 280px);min-height:540px;grid-template-columns:235px minmax(0,1fr)}.conversas-toolbar{align-items:flex-start;flex-direction:column}.conversas-filtros{width:100%;min-width:0}.conversas-chat-topo{padding:9px 11px}.conversas-chat-acoes .btn{font-size:8px}}
 @media(max-width:620px){.conversas-workspace{display:block;position:relative;height:calc(100dvh - 230px);min-height:500px}.conversas-lista{height:100%;border:0}.conversas-chat{display:none;height:100%}.conversas-workspace.conversa-aberta .conversas-lista{display:none}.conversas-workspace.conversa-aberta .conversas-chat{display:flex}.conversas-voltar{display:block}.conversas-chat-acoes{gap:5px}.conversas-chat-acoes .btn{padding:7px 8px}.conversas-chat-identidade{min-width:0}.conversas-chat-identidade strong{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.conversas-chat-topo{gap:7px}.conversas-avatar{flex-basis:34px;width:34px;height:34px}.conversas-mensagens{padding:15px 10px}.mensagem-balao{max-width:88%}.conversas-compositor{padding:8px 7px calc(8px + env(safe-area-inset-bottom))}.conversas-compositor-linha{gap:3px}.conversas-anexos{gap:0}.conversas-icone-btn{flex-basis:32px;width:32px;height:34px}.conversas-compositor input[type=text]{height:39px;padding:0 11px;font-size:11px}.conversas-enviar{flex-basis:34px;width:34px;height:34px}.conversas-filtros select{width:150px}.conversas-toolbar{padding:14px}.conversas-toolbar-titulo{gap:8px}}
 @media(max-width:390px){.conversas-chat-acoes .btn{font-size:0;padding:7px}.conversas-chat-acoes .btn:after{content:'OK';font-size:9px}.conversas-status-chat{display:none}.conversas-filtros{flex-direction:column}.conversas-filtros select{width:100%}}
+
+
+/* Ajuste do compositor: ocupar toda a largura e preservar os controles */
+.conversas-compositor{
+  display:block;
+  flex:0 0 auto;
+  width:100%;
+  min-width:0;
+}
+.conversas-compositor-linha{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  width:100%;
+  min-width:0;
+}
+.conversas-anexos{
+  display:flex;
+  align-items:center;
+  flex:0 0 auto;
+  gap:4px;
+}
+.conversas-compositor .conversas-icone-btn{
+  display:grid;
+  place-items:center;
+  flex:0 0 37px;
+  width:37px;
+  height:37px;
+  padding:0;
+}
+.conversas-compositor input[type=text]{
+  display:block;
+  flex:1 1 0%;
+  width:0;
+  min-width:0;
+}
+.conversas-compositor .conversas-enviar{
+  flex:0 0 37px;
+  width:37px;
+  height:37px;
+  padding:0;
+}
+.conversas-preview{max-width:100%;flex-wrap:wrap}
+@media(max-width:620px){
+  .conversas-compositor-linha{gap:3px}
+  .conversas-compositor .conversas-icone-btn{flex-basis:32px;width:32px;height:34px}
+  .conversas-compositor .conversas-enviar{flex-basis:34px;width:34px;height:34px}
+}
+
+
+/* Presença do cliente e fila de atendimento */
+.conversa-item-linha{align-items:center}
+.conversa-item-presenca,.cliente-presenca i{
+  display:inline-block;flex:0 0 8px;width:8px;height:8px;border-radius:50%;
+  vertical-align:middle;background:#d94b4b;box-shadow:0 0 0 2px rgba(217,75,75,.12)
+}
+.conversa-item-presenca.online,.cliente-presenca.online i{
+  background:#20a464;box-shadow:0 0 0 2px rgba(32,164,100,.14)
+}
+.cliente-presenca{display:flex!important;align-items:center;gap:7px;margin-top:3px}
+.cliente-presenca[hidden]{display:none!important}
+.cliente-presenca small{font-size:10px;color:#75868c}

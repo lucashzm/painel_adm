@@ -23,7 +23,7 @@
 <div class="conversas-toolbar-titulo"><div><span class="dashboard-kicker">ATENDIMENTO</span><h2>Caixa de entrada</h2></div><span class="conversas-contador" id="contadorConversas">0 conversas</span></div>
 <div class="conversas-filtros">
 <label class="conversas-busca"><span class="sr-only">Buscar conversa</span><input id="buscaConversas" type="search" placeholder="Buscar por nome ou telefone"></label>
-<select id="filtroConversas" aria-label="Filtrar conversas"><option value="todas">Todas as conversas</option><option value="aguardando">Aguardando atendimento</option><option value="em_atendimento">Em atendimento</option><option value="inativa">Inativas</option><option value="encerrada">Encerradas</option></select>
+<select id="filtroConversas" aria-label="Filtrar conversas"><option value="abertas" selected>Aguardando + em atendimento</option><option value="todas">Todas as conversas</option><option value="aguardando">Somente aguardando</option><option value="em_atendimento">Somente em atendimento</option><option value="inativa">Inativas</option><option value="encerrada">Encerradas</option></select>
 </div>
 </section>
 <section class="conversas-workspace" id="workspaceConversas" aria-label="Área de atendimento">
@@ -35,7 +35,7 @@
 <div class="conversas-chat-topo">
 <button class="conversas-voltar" id="btnVoltarLista" type="button" aria-label="Voltar para a lista">‹</button>
 <div class="conversas-avatar" id="chatAvatar">BM</div>
-<div class="conversas-chat-identidade"><strong id="chatNome">Atendimento BM Móveis</strong><span id="chatTelefone">Selecione uma conversa</span></div>
+<div class="conversas-chat-identidade"><strong id="chatNome">Atendimento BM Móveis</strong><span id="chatTelefone">Selecione uma conversa</span><span class="cliente-presenca" id="clientePresenca" hidden><i></i><small id="clientePresencaTexto">Offline</small></span></div>
 <div class="conversas-chat-acoes"><span class="conversas-status-chat" id="chatStatus">Aguardando seleção</span><button id="btnAssumir" class="btn btn-pesquisar" type="button" disabled>Assumir atendimento</button><button id="btnEncerrar" class="btn btn-limpar" type="button" disabled>Encerrar</button></div>
 </div>
 <div class="conversas-chat-vazio" id="chatVazio"><div class="conversas-chat-simbolo">BM</div><h2>Seu próximo atendimento começa aqui</h2><p>Selecione uma conversa na lista para visualizar as mensagens e responder ao cliente.</p></div>
@@ -63,5 +63,5 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/conversas.js"></script>
+<script>window.painelAuthReady.then(ok=>{if(ok){const s=document.createElement('script');s.src='js/conversas.js';document.body.appendChild(s);}});</script>
 </body></html>
