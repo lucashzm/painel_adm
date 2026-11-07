@@ -6,7 +6,7 @@
   const $ = (id) => document.getElementById(id);
   const state = {
     user: null, staff: null, conversations: [], selected: null,
-    messageChannel: null, listChannel: null, pendingFile: null,
+    messageChannel: null, listChannel: null, presenceChannel: null, onlineConversations: new Set(), pendingFile: null,
     recorder: null, recorderStream: null, audioChunks: [], recordingStarted: 0,
     recordingTimer: null, recordingDuration: 0
   };
@@ -50,6 +50,11 @@
     const c = state.selected;
     $('chatNome').textContent = c ? c.nome_cliente : 'Atendimento BM Móveis';
     $('chatTelefone').textContent = c ? c.telefone : 'Selecione uma conversa';
+    const online = !!c && state.onlineConversations.has(c.id);
+    $('clientePresenca').classList.toggle('online', online);
+    $('clientePresenca').classList.toggle('offline', !!c && !online);
+    $('clientePresenca').hidden = !c;
+    $('clientePresencaTexto').textContent = online ? 'Online agora' : 'Offline';
     $('chatAvatar').textContent = c ? (c.nome_cliente || 'C').trim().slice(0,1).toUpperCase() : 'BM';
     $('chatStatus').textContent = c ? statusLabel(conversationStatus(c)) : 'Aguardando seleção';
     $('btnAssumir').hidden = !c || canReply();
@@ -65,7 +70,8 @@
     const rows = state.conversations.filter(c => {
       const status = conversationStatus(c);
       const matchesText = !query || (c.nome_cliente + ' ' + c.telefone).toLocaleLowerCase('pt-BR').includes(query);
-      return matchesText && (filter === 'todas' || filter === status);
+      const matchesFilter = filter === 'abertas' ? ['aguardando','em_atendimento'].includes(status) : (filter === 'todas' || filter === status);
+      return matchesText && matchesFilter;
     });
     $('contadorConversas').textContent = state.conversations.length + (state.conversations.length === 1 ? ' conversa' : ' conversas');
     $('totalLista').textContent = rows.length;
@@ -78,13 +84,20 @@
       list.appendChild(empty);
       return;
     }
+    rows.sort((a,b) => {
+      const aStatus = conversationStatus(a), bStatus = conversationStatus(b);
+      const activeQueue = filter === 'abertas' || filter === 'aguardando' || filter === 'em_atendimento';
+      if (activeQueue) return new Date(a.criado_em) - new Date(b.criado_em);
+      return new Date(b.ultima_atividade_em) - new Date(a.ultima_atividade_em);
+    });
     rows.forEach(c => {
       const item = document.createElement('button');
       item.type = 'button';
       item.className = 'conversa-item' + (state.selected?.id === c.id ? ' selecionada' : '');
       const last = c.ultima_mensagem || 'Inicie o atendimento';
+      const isOnline = state.onlineConversations.has(c.id);
       item.innerHTML = '<span class="conversa-item-avatar">' + escapeHtml((c.nome_cliente || 'C').trim().slice(0,1).toUpperCase()) + '</span>' +
-        '<span class="conversa-item-conteudo"><span class="conversa-item-linha"><strong>' + escapeHtml(c.nome_cliente) + '</strong><time>' + formatTime(c.ultima_atividade_em) + '</time></span>' +
+        '<span class="conversa-item-conteudo"><span class="conversa-item-linha"><strong>' + escapeHtml(c.nome_cliente) + '</strong><span class="conversa-item-presenca ' + (isOnline ? 'online' : 'offline') + '" title="' + (isOnline ? 'Cliente online' : 'Cliente offline') + '" aria-label="' + (isOnline ? 'Cliente online' : 'Cliente offline') + '"></span><time>' + formatTime(c.ultima_atividade_em) + '</time></span>' +
         '<span class="conversa-item-previa">' + escapeHtml(last) + '</span><span class="conversa-item-status status-' + conversationStatus(c) + '">' + statusLabel(conversationStatus(c)) + '</span></span>';
       item.addEventListener('click', () => selectConversation(c.id));
       list.appendChild(item);
@@ -173,6 +186,24 @@
     $('chatVazio').hidden = true;
     box.hidden = false;
     box.scrollTop = box.scrollHeight;
+  }
+  function refreshPresence() {
+    const presence = state.presenceChannel?.presenceState?.() || {};
+    const online = new Set();
+    Object.values(presence).flat().forEach(entry => {
+      if (entry?.role === 'cliente' && entry?.online === true && entry?.conversation_id) online.add(entry.conversation_id);
+    });
+    state.onlineConversations = online;
+    renderConversationList();
+    updateChatHeader();
+  }
+  function startPresenceSubscription() {
+    if (state.presenceChannel) return;
+    state.presenceChannel = chatDb.channel('bm-chat-client-presence', { config: { presence: { key: 'painel-' + state.staff.id } } })
+      .on('presence', { event: 'sync' }, refreshPresence)
+      .on('presence', { event: 'join' }, refreshPresence)
+      .on('presence', { event: 'leave' }, refreshPresence)
+      .subscribe(status => { if (status === 'SUBSCRIBED') refreshPresence(); });
   }
   function stopMessageSubscription() {
     if (state.messageChannel) chatDb.removeChannel(state.messageChannel);
@@ -352,6 +383,7 @@
     state.staff = staff;
     try {
       await loadConversations();
+      startPresenceSubscription();
       $('conexaoStatus').textContent = 'Conectado';
       state.listChannel = chatDb.channel('chat-lista-painel')
         .on('postgres_changes',{event:'*',schema:'public',table:'chat_conversas'},async () => {
