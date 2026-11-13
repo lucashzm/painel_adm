@@ -11,16 +11,38 @@ function destinoSeguro() {
   return destino.endsWith('.html') ? destino : 'index.html';
 }
 
+async function consultarPerfil(userId) {
+  const { data, error } = await db.from('users')
+    .select('id,nome,cargo,ativo').eq('auth_user_id', userId).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+function ehDiretor(staff) {
+  return !!staff && staff.ativo !== false &&
+    (staff.cargo === 'administrador' || staff.cargo === 'diretor');
+}
+
 async function verificarLogin() {
-  const { data, error } = await db.auth.getUser();
-  if (error || !data.user) {
+  const { data: { user }, error } = await db.auth.getUser();
+  if (error || !user) {
     const next = encodeURIComponent(window.location.pathname.split('/').pop() || 'index.html');
     window.location.replace(`login.html?next=${next}`);
-    return null;
+    return false;
+  }
+
+  let staff;
+  try { staff = await consultarPerfil(user.id); }
+  catch { staff = null; }
+
+  if (!ehDiretor(staff)) {
+    await db.auth.signOut();
+    window.location.replace('login.html?erro=sem-permissao');
+    return false;
   }
 
   const usuarioEl = document.getElementById('usuarioLogado');
-  if (usuarioEl) usuarioEl.textContent = data.user.email || '';
+  if (usuarioEl) usuarioEl.textContent = staff.nome || user.email || '';
 
   const logoutEl = document.getElementById('logoutBtn');
   if (logoutEl) {
@@ -35,20 +57,37 @@ async function verificarLogin() {
       window.location.replace('login.html');
     });
   }
-
-  return data.user;
+  return true;
 }
 
 async function prepararLogin() {
-  const { data } = await db.auth.getSession();
-  if (data.session) window.location.replace(destinoSeguro());
+  const erroEl = document.getElementById('loginErro');
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('erro') === 'sem-permissao' && erroEl) {
+    erroEl.textContent = 'Este acesso é exclusivo da direção.';
+    erroEl.hidden = false;
+  }
+
+  const { data: { user } } = await db.auth.getUser();
+  if (user) {
+    let staff;
+    try { staff = await consultarPerfil(user.id); } catch { staff = null; }
+    if (ehDiretor(staff)) {
+      window.location.replace(destinoSeguro());
+      return;
+    }
+    await db.auth.signOut();
+    if (erroEl) {
+      erroEl.textContent = 'Este acesso é exclusivo da direção.';
+      erroEl.hidden = false;
+    }
+  }
 
   const form = document.getElementById('loginForm');
   if (!form) return;
 
   const emailEl = document.getElementById('email');
   const senhaEl = document.getElementById('senha');
-  const erroEl = document.getElementById('loginErro');
   const botaoEl = document.getElementById('entrar');
 
   form.addEventListener('submit', async (event) => {
@@ -56,7 +95,7 @@ async function prepararLogin() {
     erroEl.textContent = '';
     erroEl.hidden = true;
     botaoEl.disabled = true;
-    botaoEl.textContent = 'Entrando...';
+    botaoEl.textContent = 'Verificando acesso...';
 
     const { error } = await db.auth.signInWithPassword({
       email: emailEl.value.trim(),
@@ -71,12 +110,24 @@ async function prepararLogin() {
       return;
     }
 
+    const { data: { user: signedUser } } = await db.auth.getUser();
+    let staff;
+    try { staff = signedUser ? await consultarPerfil(signedUser.id) : null; } catch { staff = null; }
+    if (!ehDiretor(staff)) {
+      await db.auth.signOut();
+      erroEl.textContent = 'Este acesso é exclusivo da direção.';
+      erroEl.hidden = false;
+      botaoEl.disabled = false;
+      botaoEl.textContent = 'Entrar';
+      return;
+    }
     window.location.replace(destinoSeguro());
   });
 }
 
 if (paginaAtual === paginaLogin) {
   prepararLogin();
+  window.painelAuthReady = Promise.resolve(false);
 } else {
-  verificarLogin();
+  window.painelAuthReady = verificarLogin();
 }
